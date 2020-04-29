@@ -1,3 +1,44 @@
+# Parser Checklist:
+| Rule       | Parser implemented?  |
+| ---------- | -------------------- |
+| message    |          ❌          |
+| prefix     |          ❌          |
+| command    |          ❌          |
+| params     |          ❌          |
+| nospcrlfcl |          ❌          |
+| middle     |          ❌          |
+| trailing   |          ❌          |
+| SPACE      |          ❌          |
+| crlf       |          ❌          |
+| target     |          ❌          |
+| msgtarget  |          ❌          |
+| msgto      |          ❌          |
+| channel    |          ❌          |
+| servername |          ❌          |
+| host       |          ✔           |
+| hostname   |          ✔           |
+| shortname  |          ✔           |
+| hostaddr   |          ✔           |
+| ip4addr    |          ✔           |
+| ip6addr    |          ✔           |
+| nickname   |          ❌          |
+| targetmask |          ❌          |
+| chanstring |          ❌          |
+| channelid  |          ❌          |
+| user       |          ❌          |
+| key        |          ❌          |
+| letter     |          ✔           |
+| digit      |          ✔           |
+| hexdigit   |          ✔           |
+| special    |          ❌          |
+| mask       |          ❌          |
+| wildone    |          ❌          |
+| wildmany   |          ❌          |
+| nowild     |          ❌          |
+| noesc      |          ❌          |
+| matchone   |          ❌          |
+| matchmany  |          ❌          |
+
 # IRC ABNF Spec
 ```
 ; Pulled from https://tools.ietf.org/html/rfc2812#section-3
