@@ -49,7 +49,7 @@ let pHostName : Parser<_> =
     stringsSepBy1 pShortName (pstring ".")
 
 // could potentially allow for malformed IPV4 addresses, but this conforms to the IRC spec... hm...
-let pIPv4 : Parser<_> =
+let pIP4Addr : Parser<_> =
     let part : Parser<string> = manyMinMaxSatisfy 1 3 Char.IsDigit
     pipe4
         (part .>> pchar '.')
@@ -58,7 +58,7 @@ let pIPv4 : Parser<_> =
         part
         (fun a b c d -> sprintf "%s.%s.%s.%s" a b c d |> IPAddress.Parse)
 
-let pIPv6 : Parser<_> =
+let pIP6Addr : Parser<_> =
     let pTypical : Parser<_> =
         let part : Parser<string> = many1Chars pHexDigit
         part                 >>= fun a ->
@@ -74,8 +74,10 @@ let pIPv6 : Parser<_> =
             (pstring "0:0:0:0:0:")
             (pstring "0" <|> pstring "FFFF")
             (pstring ":")
-            pIPv4
+            pIP4Addr
             (fun a b c address -> IPAddress.Parse(a + b + c + string address))
             // TODO: ^^^ Absolutely nasty, I need a better way of doing this.
             // Maybe refactor IPV6/IPV4 to return string instead of address?
     pIPv4Format <|> pTypical
+
+let pHostAddr = pIP4Addr <|> pIP6Addr

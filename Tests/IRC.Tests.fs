@@ -52,7 +52,7 @@ let ``basic parsing`` =
                 )
             )
             testCase "pIPv4 compared"
-            <| Helpers.parseAndCompare (pIPv4 .>> eof)
+            <| Helpers.parseAndCompare (pIP4Addr .>> eof)
                 ([
                     "192.168.0.1"
                     "0.0.0.0"
@@ -89,7 +89,7 @@ let ``basic parsing`` =
                 ]
                 |> List.map (fun str -> (str, IPAddress.Parse(str))))
             testCase "pIPv6 compared"
-            <| Helpers.parseAndCompare (pIPv6 .>> eof)
+            <| Helpers.parseAndCompare (pIP6Addr .>> eof)
                 ([
                     "fd5d:b9f8:76e1:fc40:0000:0000:0000:0000"
                     "fd5d:b9f8:76e1:fc40:ffff:ffff:ffff:ffff"
