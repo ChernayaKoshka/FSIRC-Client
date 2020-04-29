@@ -31,6 +31,26 @@ let ``basic parsing`` =
                     Expect.isFailure result "Should not parse successfully"
                 )
             )
+            testCase "pHostName compared"
+            <| Helpers.parseAndCompare (pHostName .>> eof)
+                [
+                    ("abc.123.def.456", "abc.123.def.456")
+                    ("abc-123.def-456", "abc-123.def-456")
+                    ("abc-456", "abc-456")
+                    ("abc-123.def.456", "abc-123.def.456")
+                ]
+            testCase "pHostName failures" (fun _ ->
+                [
+                    ".abc"
+                    "abc."
+                    "ab..c"
+                    "a.b.c.d.."
+                ]
+                |> List.iter (fun testStr ->
+                    let result = Helpers.run (pHostName .>> eof) testStr
+                    Expect.isFailure result "Should not parse successfully"
+                )
+            )
         ]
         // testList "prefix parsing" [
         //     testCase "servername"
