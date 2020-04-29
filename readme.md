@@ -1,5 +1,5 @@
 # IRC ABNF Spec
-
+```
 ; Pulled from https://tools.ietf.org/html/rfc2812#section-3
 ; With some Errata applied:
 ; * https://www.rfc-editor.org/errata/eid4289
@@ -87,3 +87,4 @@ matchone   =  %x01-FF
                 ; matches wildone
 matchmany  =  *matchone
                 ; matches wildmany
+```
