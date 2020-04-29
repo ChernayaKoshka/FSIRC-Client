@@ -4,6 +4,7 @@
     <TargetFramework>net461</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Types.fs" />
     <Compile Include="Extensions.fs" />
     <Compile Include="TCP.fs" />
     <Compile Include="IRC.fs" />

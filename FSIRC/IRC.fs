@@ -3,35 +3,6 @@ open FParsec
 open System
 open System.Net.Sockets
 
-type Command =
-    | TextCommand of string
-    | IntCommand of uint32
-    with
-        override this.ToString() =
-            match this with
-            | TextCommand str -> str
-            | IntCommand int -> int.ToString()
-
-type Message =
-    {
-        Prefix : string option
-        Command : Command
-        Parameters : string[]
-    }
-    with
-        override this.ToString() =
-            let prefix =
-                match this.Prefix with
-                | Some prefix ->
-                    prefix + " "
-                | None ->
-                    String.Empty
-            let command = this.Command.ToString()
-
-            let args = String.concat " " this.Parameters
-
-            sprintf "%s %s %s" prefix command args
-
 module internal MessageParsing =
     type UserState =
         {
