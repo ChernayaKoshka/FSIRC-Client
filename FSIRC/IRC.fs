@@ -3,89 +3,28 @@ open FParsec
 open System
 open System.Net.Sockets
 
-module internal MessageParsing =
-    type UserState =
-        {
-            ArgsParsed : int
-        }
-    type Parser<'t> = Parser<'t, UserState>
+type UserState =
+    {
+        ArgsParsed : int
+    }
+type Parser<'t> = Parser<'t, UserState>
 
-    let p3Digit : Parser<_> =
-        puint32
-        |>> (fun d3 ->
-            if d3 <= 999u then
-                d3
-            else
-                failwith "Err: > 999")
+let maxArgsExceeded (userState:UserState) : bool =
+    userState.ArgsParsed >= 14
 
-    let notNewline : Parser<_> =
-        noneOf ['\r'; '\n']
+let incrementArgCount : Parser<_> =
+    updateUserState (fun state -> { state with ArgsParsed = state.ArgsParsed + 1 })
 
-    let notSpace : Parser<_> =
-        noneOf [' ']
+let resetArgCount : Parser<_> =
+    setUserState { ArgsParsed = 0 }
 
-    let maxArgsExceeded (userState:UserState) : bool =
-        userState.ArgsParsed >= 14
+let pLetter : Parser<_> =
+    anyOf (['A'..'Z'] @ ['a'..'z'])
 
-    let incrementArgCount : Parser<_> =
-        updateUserState (fun state -> { state with ArgsParsed = state.ArgsParsed + 1 })
+let pDigit : Parser<_> =
+    anyOf ['0'..'9']
 
-    let resetArgCount : Parser<_> =
-        setUserState { ArgsParsed = 0 }
-
-    let pPrefix : Parser<_> =
-        pchar ':'
-        >>. many1CharsTill anyChar (pchar ' ')
-
-    let pCommandStr : Parser<_> =
-        many1Chars asciiLetter
-        |>> TextCommand
-
-    let pCommandArg : Parser<_> =
-        many1CharsTill (noneOf [ ' '; '\r'; '\n'; ':' ]) (anyOf [ ' '; '\r'; '\n'; ':' ])
-        .>> incrementArgCount
-
-    let pCommandArgs : Parser<_> =
-        pipe2
-            (manyTill pCommandArg (pchar ':' |>> ignore <|> userStateSatisfies maxArgsExceeded))
-            (restOfLine false)
-            (fun args final-> args @ [final])
-
-    let pCommand : Parser<_> =
-        pipe3
-            (opt pPrefix)
-            ((pCommandStr <|> (p3Digit |>> IntCommand)) .>> pchar ' ')
-            pCommandArgs
-            (fun prefix command args ->
-                {
-                    Prefix = prefix
-                    Command = command
-                    Parameters = Array.ofList args
-                })
-        .>> resetArgCount
-
-    let ParseCommandStr str =
-        match runParserOnString (many (pCommand .>> (many1 newline)))  { ArgsParsed = 0 } "" str with
-        | Success (result,_,_) -> Result.Ok result
-        | Failure (err,_,_) -> Result.Error err
-
-
-
-    //let testData =
-    //    [
-    //        ":irc.foonet.com NOTICE * :*** Looking up your hostname...";
-    //        ":irc.foonet.com NOTICE * :*** Found your hostname";
-    //        "ERROR :Closing Link: [127.0.0.1] (Registration Timeout)"
-    //    ]
-    //    |> List.map test
-
-open MessageParsing
-
-let parseCommand = ParseCommandStr
-
-let sendMessage (client : TcpClient) (message : Message) =
-    ()
-
-
-//let processMessage (message : Message) =
+let pShortName : Parser<_> =
+    sepBy (pDigit <|> pLetter) (pchar '-')
+    |>> (Array.ofList >> String)
 
