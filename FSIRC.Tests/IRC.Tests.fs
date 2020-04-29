@@ -1,36 +1,69 @@
 module Tests
 
 open Expecto
+open FSIRC
+open FSIRC.IRC
+open System.Net
 
 [<Tests>]
-let tests =
-    testList "samples" [
-        testCase "universe exists (╭ರᴥ•́)" <| fun _ ->
-            let subject = true
-            Expect.isTrue subject "I compute, therefore I am."
+let ``basic parsing`` =
+    testList "basic parsing" [
+        testList "primitives" [
+            testCase "pShortName compared"
+            <| Helpers.parseAndCompare pShortName
+                [
+                    ("1", "1")
+                    ("123", "123")
+                    ("12-3", "12-3")
+                    ("abc-def-123-456", "abc-def-123-456")
+                ]
+        ]
+        // testList "prefix parsing" [
+        //     testCase "servername"
+        //     <| Helpers.parseAndCompare pPrefix
+        //         [
+        //             ("irc.foonet.com", Prefix.ServerName "irc.foonet.com")
+        //             ("csd.bu.edu", Prefix.ServerName "csd.bu.edu")
+        //             ("tolsun.oulu.fi", Prefix.ServerName "tolsun.oulu.fi")
+        //             ("ircd.stealth.net", Prefix.ServerName "ircd.stealth.net")
+        //         ]
+        //     testCase "nickname"
+        //     <| Helpers.parseAndCompare pPrefix
+        //         [
+        //             ("WiZ", Prefix.User ({ NickName = "WiZ"; User = None; Host = None }))
+        //             ("syrk", Prefix.User ({ NickName = "syrk"; User = None; Host = None }))
+        //             ("Angel", Prefix.User ({ NickName = "Angel"; User = None; Host = None }))
+        //         ]
+        //     testCase "nickname with host"
+        //     <| Helpers.parseAndCompare pPrefix
+        //         [
+        //             ("WiZ@tolsun.oulu.fi", Prefix.User ({ NickName = "WiZ"; User = None; Host = Some (HostName "tolsun.oulu.fi") }))
+        //             ("syrk@millennium.stealth.net", Prefix.User ({ NickName = "syrk"; User = None; Host = Some (HostName "millennium.stealth.net") }))
+        //             ("Angel@irc.org", Prefix.User ({ NickName = "Angel"; User = None; Host = Some (HostName "irc.org") }))
+//
+        //             ("WiZ@2600:1005:b062:61e4:74d7:f292:802c:fbfd", Prefix.User ({ NickName = "WiZ"; User = None; Host = Some (HostAddress (IPAddress.Parse("2600:1005:b062:61e4:74d7:f292:802c:fbfd")))}))
+        //             ("syrk@2600:1005:b062:61e4:74d7:f292:802c:fbfd", Prefix.User ({ NickName = "syrk"; User = None; Host = Some (HostAddress (IPAddress.Parse("2600:1005:b062:61e4:74d7:f292:802c:fbfd")))}))
+        //             ("Angel@2600:1005:b062:61e4:74d7:f292:802c:fbfd", Prefix.User ({ NickName = "Angel"; User = None; Host = Some (HostAddress (IPAddress.Parse("2600:1005:b062:61e4:74d7:f292:802c:fbfd")))}))
+//
+        //             ("WiZ@192.168.0.1", Prefix.User ({ NickName = "WiZ"; User = None; Host = Some (HostAddress (IPAddress.Parse("192.168.0.1")) )}))
+        //             ("syrk@192.168.0.1", Prefix.User ({ NickName = "syrk"; User = None; Host = Some (HostAddress (IPAddress.Parse("192.168.0.1")) )}))
+        //             ("Angel@192.168.0.1", Prefix.User ({ NickName = "Angel"; User = None; Host = Some (HostAddress (IPAddress.Parse("192.168.0.1")) )}))
+        //         ]
+        //     testCase "nickname with user and host"
+        //     <| Helpers.parseAndCompare pPrefix
+        //         [
+        //             ("WiZ!jto@tolsun.oulu.fi", Prefix.User ({ NickName = "WiZ"; User = Some "jto"; Host = Some (HostName "tolsun.oulu.fi") }))
+        //             ("syrk!kalt@millennium.stealth.net", Prefix.User ({ NickName = "syrk"; User = Some "kalt"; Host = Some (HostName "millennium.stealth.net") }))
+        //             ("Angel!wings@irc.org", Prefix.User ({ NickName = "Angel"; User = Some "wings"; Host = Some (HostName "irc.org") }))
+//
+        //             ("WiZ!jto@2600:1005:b062:61e4:74d7:f292:802c:fbfd", Prefix.User ({ NickName = "WiZ"; User = Some "jto"; Host = Some (HostAddress (IPAddress.Parse("2600:1005:b062:61e4:74d7:f292:802c:fbfd")))}))
+        //             ("syrk!kalt@2600:1005:b062:61e4:74d7:f292:802c:fbfd", Prefix.User ({ NickName = "syrk"; User = Some "kalt"; Host = Some (HostAddress (IPAddress.Parse("2600:1005:b062:61e4:74d7:f292:802c:fbfd")))}))
+        //             ("Angel!wings@2600:1005:b062:61e4:74d7:f292:802c:fbfd", Prefix.User ({ NickName = "Angel"; User = Some "wings"; Host = Some (HostAddress (IPAddress.Parse("2600:1005:b062:61e4:74d7:f292:802c:fbfd")))}))
+//
+        //             ("WiZ!jto@192.168.0.1", Prefix.User ({ NickName = "WiZ"; User = Some "jto"; Host = Some (HostAddress (IPAddress.Parse("192.168.0.1")) )}))
+        //             ("syrk!kalt@192.168.0.1", Prefix.User ({ NickName = "syrk"; User = Some "kalt"; Host = Some (HostAddress (IPAddress.Parse("192.168.0.1")) )}))
+        //             ("Angel!wings@192.168.0.1", Prefix.User ({ NickName = "Angel"; User = Some "wings"; Host = Some (HostAddress (IPAddress.Parse("192.168.0.1")) )}))
+        //         ]
+        // ]
 
-        testCase "when true is not (should fail)" <| fun _ ->
-            let subject = false
-            Expect.isTrue subject "I should fail because the subject is false"
-
-        testCase "I'm skipped (should skip)" <| fun _ ->
-            Tests.skiptest "Yup, waiting for a sunny day..."
-
-        testCase "I'm always fail (should fail)" <| fun _ ->
-            Tests.failtest "This was expected..."
-
-        testCase "contains things" <| fun _ ->
-            Expect.containsAll [| 2; 3; 4 |] [| 2; 4 |]
-                                                 "This is the case; {2,3,4} contains {2,4}"
-
-        testCase "contains things (should fail)" <| fun _ ->
-            Expect.containsAll [| 2; 3; 4 |] [| 2; 4; 1 |]
-                                                 "Expecting we have one (1) in there"
-
-        testCase "Sometimes I want to ༼ノಠل͟ಠ༽ノ ︵ ┻━┻" <| fun _ ->
-            Expect.equal "abcdëf" "abcdef" "These should equal"
-
-        test "I am (should fail)" {
-            "╰〳 ಠ 益 ಠೃ 〵╯" |> Expect.equal true false
-        }
     ]
