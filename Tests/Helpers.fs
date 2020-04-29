@@ -7,7 +7,7 @@ open FParsec
 open Expecto
 open Expecto.FParsec
 
-open FSIRC.IRC
+open FSIRC.Parsing
 
 let unwrap parseResult =
     match parseResult with
