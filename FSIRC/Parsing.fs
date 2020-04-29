@@ -80,4 +80,6 @@ let pIP6Addr : Parser<_> =
             // Maybe refactor IPV6/IPV4 to return string instead of address?
     pIPv4Format <|> pTypical
 
-let pHostAddr = pIP4Addr <|> pIP6Addr
+let pHostAddr = (attempt pIP4Addr) <|> pIP6Addr
+
+let pHost = (attempt (pHostAddr |>> HostAddress)) <|> (pHostName |>> HostName)
