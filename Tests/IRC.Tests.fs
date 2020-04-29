@@ -97,6 +97,43 @@ let ``basic parsing`` =
                     "0:0:0:0:0:FFFF:192.168.0.1"
                 ]
                 |> List.map (fun str -> (str, IPAddress.Parse(str))))
+            testCase "pHostAddress compared"
+            <| Helpers.parseAndCompare (pHostAddr .>> eof)
+                ([
+                    "fd5d:b9f8:76e1:fc40:0000:0000:0000:0000"
+                    "fd5d:b9f8:76e1:fc40:ffff:ffff:ffff:ffff"
+                    "0:0:0:0:0:0:192.168.0.1"
+                    "0:0:0:0:0:FFFF:192.168.0.1"
+                    "239.255.255.255"
+                    "240.0.0.0"
+                    "255.255.255.254"
+                    "255.255.255.255"
+                ]
+                |> List.map (fun str -> (str, IPAddress.Parse(str))))
+            testCase "pHost compared"
+            <| Helpers.parseAndCompare (pHost .>> eof)
+                (
+                    ([
+                        "239.255.255.255"
+                        "240.0.0.0"
+                        "255.255.255.254"
+                        "255.255.255.255"
+                        "fd5d:b9f8:76e1:fc40:0000:0000:0000:0000"
+                        "fd5d:b9f8:76e1:fc40:ffff:ffff:ffff:ffff"
+                        "0:0:0:0:0:0:192.168.0.1"
+                        "0:0:0:0:0:FFFF:192.168.0.1"
+                    ]
+                    |> List.map (fun str -> str, str |> IPAddress.Parse |> HostAddress))
+                    @
+                    ([
+                        "abc"
+                        "abc.123.def.456"
+                        "abc-123.def-456"
+                        "abc-456"
+                        "abc-123.def.456"
+                    ]
+                    |> List.map (fun str -> str, HostName str))
+                )
         ]
         // testList "prefix parsing" [
         //     testCase "servername"
