@@ -38,8 +38,8 @@ let pShortName : Parser<_> =
         -abc
     *)
     pLetterOrDigit
-    .>>. sepBy (many1Chars pLetterOrDigit) (pchar '-')
-    |>> (fun (first, rest) ->
-        string first + (String.concat "-" rest))
+    .>>. stringsSepBy (many1Chars pLetterOrDigit) (pstring "-")
+    |>> (fun (start, rest) -> string start + rest)
 
-
+let pHostName : Parser<_> =
+    stringsSepBy1 pShortName (pstring ".")
