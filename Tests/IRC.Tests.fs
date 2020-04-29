@@ -38,6 +38,10 @@ let ``basic parsing`` =
                     ("abc-123.def-456", "abc-123.def-456")
                     ("abc-456", "abc-456")
                     ("abc-123.def.456", "abc-123.def.456")
+                    ("irc.foonet.com", "irc.foonet.com")
+                    ("csd.bu.edu", "csd.bu.edu")
+                    ("tolsun.oulu.fi", "tolsun.oulu.fi")
+                    ("ircd.stealth.net", "ircd.stealth.net")
                 ]
             testCase "pHostName failures" (fun _ ->
                 [
@@ -131,6 +135,10 @@ let ``basic parsing`` =
                         "abc-123.def-456"
                         "abc-456"
                         "abc-123.def.456"
+                        "irc.foonet.com"
+                        "csd.bu.edu"
+                        "tolsun.oulu.fi"
+                        "ircd.stealth.net"
                     ]
                     |> List.map (fun str -> str, HostName str))
                 )
