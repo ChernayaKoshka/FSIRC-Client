@@ -88,6 +88,15 @@ let ``basic parsing`` =
                     "255.255.255.255"
                 ]
                 |> List.map (fun str -> (str, IPAddress.Parse(str))))
+            testCase "pIPv6 compared"
+            <| Helpers.parseAndCompare (pIPv6 .>> eof)
+                ([
+                    "fd5d:b9f8:76e1:fc40:0000:0000:0000:0000"
+                    "fd5d:b9f8:76e1:fc40:ffff:ffff:ffff:ffff"
+                    "0:0:0:0:0:0:192.168.0.1"
+                    "0:0:0:0:0:FFFF:192.168.0.1"
+                ]
+                |> List.map (fun str -> (str, IPAddress.Parse(str))))
         ]
         // testList "prefix parsing" [
         //     testCase "servername"
