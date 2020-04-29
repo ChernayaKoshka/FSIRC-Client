@@ -1,4 +1,4 @@
-module IRC
+module FSIRC.IRC
 open FParsec
 open System
 open System.Net.Sockets

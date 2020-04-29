@@ -8,10 +8,6 @@
     <Compile Include="TCP.fs" />
     <Compile Include="IRC.fs" />
     <Compile Include="FSIRC.fs" />
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="FParsec" />
   </ItemGroup>
   <Import Project="..\.paket\Paket.Restore.targets" />
 </Project>

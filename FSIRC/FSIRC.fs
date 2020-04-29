@@ -1,4 +1,4 @@
-module FSIRC
+module FSIRC.Program
 
 [<EntryPoint>]
 let main argv =

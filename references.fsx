@@ -9,7 +9,6 @@
 #r @"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6.1\System.Xml.Linq.dll"
 #r @"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6.1\System.Xml.dll"
 #r @"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6.1\System.dll"
-#load @"c:\Users\Chris\Desktop\IRC\FSIRC\obj\Debug\net461\FSIRC.AssemblyInfo.fs"
 #load @"c:\Users\Chris\Desktop\IRC\FSIRC\Extensions.fs"
 #load @"c:\Users\Chris\Desktop\IRC\FSIRC\TCP.fs"
 #load @"c:\Users\Chris\Desktop\IRC\FSIRC\IRC.fs"

@@ -1,4 +1,4 @@
-module Extensions
+module FSIRC.Extensions
     [<RequireQualifiedAccess>]
     module Result =
         let ofChoice choice =

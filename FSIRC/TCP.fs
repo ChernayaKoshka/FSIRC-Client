@@ -1,4 +1,4 @@
-module TCP
+module FSIRC.TCP
 
 open Extensions
 
