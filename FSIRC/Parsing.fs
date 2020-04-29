@@ -43,3 +43,13 @@ let pShortName : Parser<_> =
 
 let pHostName : Parser<_> =
     stringsSepBy1 pShortName (pstring ".")
+
+// could potentially allow for malformed IPV4 addresses, but this conforms to the IRC spec... hm...
+let pIPv4 : Parser<_> =
+    let part : Parser<string> = manyMinMaxSatisfy 1 3 Char.IsDigit
+    pipe4
+        (part .>> pchar '.')
+        (part .>> pchar '.')
+        (part .>> pchar '.')
+        part
+        (fun a b c d -> sprintf "%s.%s.%s.%s" a b c d |> System.Net.IPAddress.Parse)
