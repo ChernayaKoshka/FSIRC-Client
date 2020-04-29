@@ -2,7 +2,8 @@ module Tests
 
 open Expecto
 open FSIRC
-open FSIRC.IRC
+open FParsec
+open FSIRC.Parsing
 open System.Net
 
 [<Tests>]
@@ -10,13 +11,26 @@ let ``basic parsing`` =
     testList "basic parsing" [
         testList "primitives" [
             testCase "pShortName compared"
-            <| Helpers.parseAndCompare pShortName
+            <| Helpers.parseAndCompare (pShortName .>> eof)
                 [
                     ("1", "1")
                     ("123", "123")
                     ("12-3", "12-3")
                     ("abc-def-123-456", "abc-def-123-456")
                 ]
+            testCase "pShortName failures" (fun _ ->
+                [
+                    "-abc"
+                    "abc-"
+                    "abc-def-123-"
+                    "@bc-@ef-123"
+                    "a--b--c"
+                ]
+                |> List.iter (fun testStr ->
+                    let result = Helpers.run (pShortName .>> eof) testStr
+                    Expect.isFailure result "Should not parse successfully"
+                )
+            )
         ]
         // testList "prefix parsing" [
         //     testCase "servername"
