@@ -33,6 +33,8 @@ type UserInfo =
 type Prefix =
     | ServerName of ServerName
     | User of UserInfo
+    // ambiguous case
+    | NickNameOrServerName of string
 
 type Message =
     {
