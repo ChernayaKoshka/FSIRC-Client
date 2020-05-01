@@ -203,6 +203,37 @@ let ``basic parsing`` =
                     "500", IntCommand 500u
                     "999", IntCommand 999u
                 ]
+            testCase "pMiddle compared"
+            <| Helpers.parseAndCompare (pMiddle .>> eof)
+                [
+                    "Abwaerwet5634673875r89ftungh23523@#$!!#^#*5", "Abwaerwet5634673875r89ftungh23523@#$!!#^#*5"
+                    (['\x00'..'\xFF'] |> List.except [ '\x00'; '\r'; '\n'; ' '; ':' ] |> List.map string |> String.concat ""), (['\x00'..'\xFF'] |> List.except [ '\x00'; '\r'; '\n'; ' '; ':' ] |> List.map string |> String.concat "")
+                    "A:Really:Cool:Colon:Chain:", "A:Really:Cool:Colon:Chain:"
+                ]
+            testCase "pMiddle failures"
+            <| Helpers.parseAndExpectFailure (pMiddle .>> eof)
+                [
+                    ":OhNoIStartedWithAColon!"
+                    "\x00NotCool"
+                    "I contain spaces!"
+                    "Newlines?That'sAPaddlin'\r\n"
+                    "Newlines?That'sAPaddlin'\n"
+                    "Newlines?That'sAPaddlin'\r"
+                ]
+            testCase "pTrailing compared"
+            <| Helpers.parseAndCompare (pTrailing .>> eof)
+                [
+                    "WOW! I GET TO PARSE THINGS WITH SPACES AND COLONS NOW!", "WOW! I GET TO PARSE THINGS WITH SPACES AND COLONS NOW!"
+                    ":WOW! I GET TO PARSE THINGS WITH SPACES AND COLONS NOW!", ":WOW! I GET TO PARSE THINGS WITH SPACES AND COLONS NOW!"
+                ]
+            testCase "pTrailing failures"
+            <| Helpers.parseAndExpectFailure (pTrailing .>> eof)
+                [
+                    "I still don't get to have newlines, though \r\n"
+                    "I still don't get to have newlines, though \n"
+                    "I still don't get to have newlines, though \r"
+                    "Or naughty nulls!\x00"
+                ]
         ]
 
         testList "prefix parsing" [

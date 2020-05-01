@@ -144,6 +144,13 @@ let pPrefixUserPart : Parser<_> =
                 Host = host
             })
 
+// middle     =  nospcrlfcl *( ":" / nospcrlfcl )
+let pMiddle =
+    manyCharsStartsWith pNoSpcCrLfCl (pchar ':' <|> pNoSpcCrLfCl)
+
+// trailing   =  *( ":" / " " / nospcrlfcl )
+let pTrailing = manyChars (anyOf [ ':'; ' ' ] <|> pNoSpcCrLfCl)
+
 
 // prefix     =  servername / ( nickname [ [ "!" user ] "@" host ] )
 let pPrefix : Parser<_> =
