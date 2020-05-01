@@ -43,6 +43,25 @@ let pLetterOrDigit : Parser<_> = anyOf (digit @ letter)
 let pHexDigit = anyOf hexDigit
 let pSpecial : Parser<_> = anyOf special
 
+// nospcrlfcl =  %x01-09 / %x0B-0C / %x0E-1F / %x21-39 / %x3B-FF
+// ; any octet except NUL, CR, LF, " " and ":"
+let pNoSpcCrLfCl : Parser<_> = noneOf [ '\x00'; '\r'; '\n'; ' '; ':'  ]
+
+// SPACE      =  %x20        ; space character
+let pSpace : Parser<_> = pchar ' '
+
+// crlf       =  %x0D %x0A   ; "carriage return" "linefeed"
+// https://bitbucket.org/fparsec/main/issues/18/cant-create-a-parser-to-parse-r-n-exactly
+let pCrLf : Parser<_> =
+    let error = expected "newline (\\r\\n)"
+    let crcn = TwoChars('\r', '\n')
+    fun stream ->
+        if stream.Skip(crcn) then
+            stream.RegisterNewline()
+            Reply(())
+        else
+            Reply(Error, error)
+
 let pShortName : Parser<_> =
     (*
         abc
