@@ -10,8 +10,11 @@ type UserState =
     }
 type Parser<'t> = Parser<'t, UserState>
 
-let maxArgsExceeded (userState:UserState) : bool =
-    userState.ArgsParsed >= 14
+let maxArgsNotReached (userState:UserState) : bool =
+    userState.ArgsParsed < 15
+
+let maxArgsReached (userState:UserState) : bool =
+    userState.ArgsParsed = 14
 
 let incrementArgCount : Parser<_> =
     updateUserState (fun state -> { state with ArgsParsed = state.ArgsParsed + 1 })
@@ -150,6 +153,14 @@ let pMiddle =
 
 // trailing   =  *( ":" / " " / nospcrlfcl )
 let pTrailing = manyChars (anyOf [ ':'; ' ' ] <|> pNoSpcCrLfCl)
+
+let pTrailingParam =
+    pSpace >>. (fun stream ->
+        if maxArgsReached stream.UserState then
+            (optional (pchar ':') >>. pTrailing) stream
+        else
+            (pchar ':' >>. pTrailing) stream
+    )
 
 
 // prefix     =  servername / ( nickname [ [ "!" user ] "@" host ] )

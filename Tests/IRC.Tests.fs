@@ -234,6 +234,19 @@ let ``basic parsing`` =
                     "I still don't get to have newlines, though \r"
                     "Or naughty nulls!\x00"
                 ]
+            testCase "pTrailingParam" (fun _ ->
+                [
+                    " :Trailing !", "Trailing !", { ArgsParsed = 1 }
+                    " :Trailing !", "Trailing !", { ArgsParsed = 14 }
+                    " trailing", "trailing", { ArgsParsed = 14 }
+                ]
+                |> List.iter (fun (input, expected, state) ->
+                    let result =
+                        Helpers.runWithState state (pTrailingParam .>> eof) input
+                        |> Helpers.unwrap
+                    Expect.equal result expected "Not equal!"
+                )
+            )
         ]
 
         testList "prefix parsing" [
