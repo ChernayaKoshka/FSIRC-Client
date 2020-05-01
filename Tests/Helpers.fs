@@ -30,3 +30,11 @@ let parseAndCompare parser data =
             let unwrapped = unwrap res
             sprintf "The parsed result of '%s' was not expected!" input
             |> Expect.equal unwrapped expected)
+
+let parseAndExpectFailure parser data =
+    fun () ->
+        data
+        |> List.iter (fun testStr ->
+            let result = run parser testStr
+            Expect.isFailure result "Should not have processed successfully"
+        )
