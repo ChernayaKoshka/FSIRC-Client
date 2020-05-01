@@ -140,8 +140,27 @@ let ``basic parsing`` =
                         "tolsun.oulu.fi"
                         "ircd.stealth.net"
                     ]
-                    |> List.map (fun str -> str, HostName str))
-                )
+                    |> List.map (fun str -> str, HostName str)))
+            testCase "pNickName compared"
+            <| Helpers.parseAndCompare (pNickName .>> eof)
+                [
+                    "a23456789", "a23456789"
+                    "a", "a"
+                    "bcde{}", "bcde{}"
+                    "{Super-}", "{Super-}"
+                    "john-ab", "john-ab"
+                    "[cool]", "[cool]"
+                    "`Ne4t^1", "`Ne4t^1"
+                    "[]\\`_^{|", "[]\\`_^{|"
+                    "}cool{", "}cool{"
+                ]
+            testCase "pNickName failures"
+            <| Helpers.parseAndExpectFailure (pNickName .>> eof)
+                [
+                    "0123"
+                    "-COOL"
+                    "\x02abc"
+                ]
         ]
         // testList "prefix parsing" [
         //     testCase "servername"

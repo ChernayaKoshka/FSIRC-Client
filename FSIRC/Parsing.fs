@@ -27,10 +27,13 @@ let digit =
 
 let hexDigit = ['A'..'F'] @ ['a'..'f'] @ digit
 
+let special = ['['..'`'] @ ['{'..'}']
+
 let pLetter : Parser<_> = anyOf letter
 let pDigit : Parser<_> = anyOf digit
 let pLetterOrDigit : Parser<_> = anyOf (digit @ letter)
 let pHexDigit = anyOf hexDigit
+let pSpecial : Parser<_> = anyOf special
 
 let pShortName : Parser<_> =
     (*
@@ -47,6 +50,8 @@ let pShortName : Parser<_> =
 
 let pHostName : Parser<_> =
     stringsSepBy1 pShortName (pstring ".")
+
+let pServerName = pHostName
 
 // could potentially allow for malformed IPV4 addresses, but this conforms to the IRC spec... hm...
 let pIP4Addr : Parser<_> =
@@ -83,3 +88,8 @@ let pIP6Addr : Parser<_> =
 let pHostAddr = (attempt pIP4Addr) <|> pIP6Addr
 
 let pHost = (attempt (pHostAddr |>> HostAddress)) <|> (pHostName |>> HostName)
+
+let pNickName : Parser<string> =
+    (pLetter <|> pSpecial)
+    .>>. manyMinMaxSatisfy 0 8 (fun c -> List.contains c (letter @ digit @ special @ [ '-' ]))
+    |>> (fun (start, rest) -> string start + rest)
