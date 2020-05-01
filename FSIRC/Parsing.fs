@@ -101,3 +101,30 @@ let pTarget =
 
 // any octet except NUL, CR, LF, " " and "@"
 let pUser : Parser<_> = many1Chars (noneOf [ '\x00'; '\r'; '\n'; ' '; '@' ])
+
+// ( nickname [ [ "!" user ] "@" host ] )
+let pPrefixUserPart : Parser<_> =
+    pNickName .>>. opt (opt (pchar '!' >>. pUser) .>>. (pchar '@' >>. pHost))
+    |>> (fun (nick, additional) ->
+        let user, host =
+            match additional with
+            | Some (user, host) -> user, Some host
+            | None -> None, None
+        User
+            {
+                NickName = nick
+                User = user
+                Host = host
+            })
+
+
+// prefix     =  servername / ( nickname [ [ "!" user ] "@" host ] )
+let pPrefix : Parser<_> =
+    (attempt (pServerName .>> notFollowedBy (anyOf ['!'; '@']))
+    |>> (fun name -> 
+        // the only thing that differentiates the nickname case vs the server name case is the '.' character, which is not allowed in nicknames
+        if name.Contains(".") then 
+            ServerName name 
+        else 
+            NickNameOrServerName name ))
+    <|> pPrefixUserPart
