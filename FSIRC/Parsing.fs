@@ -128,3 +128,8 @@ let pPrefix : Parser<_> =
         else 
             NickNameOrServerName name ))
     <|> pPrefixUserPart
+
+// command    =  1*letter / 3digit
+let pCommand : Parser<_> =
+    (many1Chars pLetter |>> TextCommand) 
+    <|> (manyMinMaxSatisfy 3 3 Char.IsDigit |>> (uint32 >> IntCommand))

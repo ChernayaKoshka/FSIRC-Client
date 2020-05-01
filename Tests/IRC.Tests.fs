@@ -193,6 +193,16 @@ let ``basic parsing`` =
                     "Dont@Me"
                     "Kevin y"
                 ]
+            testCase "pCommand compared"
+            <| Helpers.parseAndCompare (pCommand .>> eof)
+                [
+                    "A", TextCommand "A"
+                    "BCDE", TextCommand "BCDE"
+                    "FGHIJKLMNOPQRSTUVWXyzrfestghtjyafeadrwvkjzokx", TextCommand "FGHIJKLMNOPQRSTUVWXyzrfestghtjyafeadrwvkjzokx"
+                    "001", IntCommand 1u
+                    "500", IntCommand 500u
+                    "999", IntCommand 999u
+                ]
         ]
 
         testList "prefix parsing" [
