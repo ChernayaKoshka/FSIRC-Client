@@ -18,7 +18,8 @@ let ``basic parsing`` =
                     ("12-3", "12-3")
                     ("abc-def-123-456", "abc-def-123-456")
                 ]
-            testCase "pShortName failures" (fun _ ->
+            testCase "pShortName failures"
+            <| Helpers.parseAndExpectFailure (pShortName .>> eof)
                 [
                     "-abc"
                     "abc-"
@@ -26,11 +27,6 @@ let ``basic parsing`` =
                     "@bc-@ef-123"
                     "a--b--c"
                 ]
-                |> List.iter (fun testStr ->
-                    let result = Helpers.run (pShortName .>> eof) testStr
-                    Expect.isFailure result "Should not parse successfully"
-                )
-            )
             testCase "pHostName compared"
             <| Helpers.parseAndCompare (pHostName .>> eof)
                 [
@@ -43,18 +39,14 @@ let ``basic parsing`` =
                     ("tolsun.oulu.fi", "tolsun.oulu.fi")
                     ("ircd.stealth.net", "ircd.stealth.net")
                 ]
-            testCase "pHostName failures" (fun _ ->
+            testCase "pHostName failures"
+            <| Helpers.parseAndExpectFailure (pHostName .>> eof)
                 [
                     ".abc"
                     "abc."
                     "ab..c"
                     "a.b.c.d.."
                 ]
-                |> List.iter (fun testStr ->
-                    let result = Helpers.run (pHostName .>> eof) testStr
-                    Expect.isFailure result "Should not parse successfully"
-                )
-            )
             testCase "pIPv4 compared"
             <| Helpers.parseAndCompare (pIP4Addr .>> eof)
                 ([
