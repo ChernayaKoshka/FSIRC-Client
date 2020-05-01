@@ -19,6 +19,14 @@ let incrementArgCount : Parser<_> =
 let resetArgCount : Parser<_> =
     setUserState { ArgsParsed = 0 }
 
+let many1CharsStartsWith (start: Parser<char>) (rest: Parser<char>) : Parser<_> =
+    start .>>. many1Chars rest
+    |>> (fun (a,b) -> string a + b)
+
+let manyCharsStartsWith (start: Parser<char>) (rest: Parser<char>) : Parser<_> =
+    start .>>. manyChars rest
+    |>> (fun (a,b) -> string a + b)
+
 let letter =
     (['A'..'Z'] @ ['a'..'z'])
 
