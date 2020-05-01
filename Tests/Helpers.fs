@@ -15,9 +15,12 @@ let unwrap parseResult =
         res
     | Failure (err, _, _) ->
         failwithf "%A" err
-
+        
 let run parser =
     runParserOnString parser { ArgsParsed = 0 } ""
+
+let runWithState (state : UserState) parser =
+    runParserOnString parser state ""
 
 let parseAndCompare parser data =
     fun () ->
