@@ -30,14 +30,14 @@ let ``basic parsing`` =
             testCase "pHostName compared"
             <| Helpers.parseAndCompare (pHostName .>> eof)
                 [
-                    ("abc.123.def.456", "abc.123.def.456")
-                    ("abc-123.def-456", "abc-123.def-456")
-                    ("abc-456", "abc-456")
-                    ("abc-123.def.456", "abc-123.def.456")
-                    ("irc.foonet.com", "irc.foonet.com")
-                    ("csd.bu.edu", "csd.bu.edu")
-                    ("tolsun.oulu.fi", "tolsun.oulu.fi")
-                    ("ircd.stealth.net", "ircd.stealth.net")
+                    "abc.123.def.456", "abc.123.def.456"
+                    "abc-123.def-456", "abc-123.def-456"
+                    "abc-456", "abc-456"
+                    "abc-123.def.456", "abc-123.def.456"
+                    "irc.foonet.com", "irc.foonet.com"
+                    "csd.bu.edu", "csd.bu.edu"
+                    "tolsun.oulu.fi", "tolsun.oulu.fi"
+                    "ircd.stealth.net", "ircd.stealth.net"
                 ]
             testCase "pHostName failures"
             <| Helpers.parseAndExpectFailure (pHostName .>> eof)
@@ -152,6 +152,28 @@ let ``basic parsing`` =
                     "0123"
                     "-COOL"
                     "\x02abc"
+                ]
+            testCase "pTarget compared"
+            <| Helpers.parseAndCompare (pTarget .>> eof)
+                [
+                    "a23456789", "a23456789"
+                    "a", "a"
+                    "bcde{}", "bcde{}"
+                    "{Super-}", "{Super-}"
+                    "john-ab", "john-ab"
+                    "[cool]", "[cool]"
+                    "`Ne4t^1", "`Ne4t^1"
+                    "[]\\`_^{|", "[]\\`_^{|"
+                    "}cool{", "}cool{"
+                    
+                    "abc.123.def.456", "abc.123.def.456"
+                    "abc-123.def-456", "abc-123.def-456"
+                    "abc-456", "abc-456"
+                    "abc-123.def.456", "abc-123.def.456"
+                    "irc.foonet.com", "irc.foonet.com"
+                    "csd.bu.edu", "csd.bu.edu"
+                    "tolsun.oulu.fi", "tolsun.oulu.fi"
+                    "ircd.stealth.net", "ircd.stealth.net"
                 ]
         ]
         // testList "prefix parsing" [

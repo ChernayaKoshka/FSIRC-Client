@@ -93,3 +93,9 @@ let pNickName : Parser<string> =
     (pLetter <|> pSpecial)
     .>>. manyMinMaxSatisfy 0 8 (fun c -> List.contains c (letter @ digit @ special @ [ '-' ]))
     |>> (fun (start, rest) -> string start + rest)
+
+let pTarget = 
+                                               // v prevents this parser from failing when it encounters a '.' which indicates that it is potentially a server name
+    (attempt (pNickName .>> notFollowedBy (pchar '.'))) 
+    <|> pServerName
+
