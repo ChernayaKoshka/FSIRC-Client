@@ -96,7 +96,7 @@ let pNickName : Parser<string> =
 
 let pTarget = 
                                                // v prevents this parser from failing when it encounters a '.' which indicates that it is potentially a server name
-    (attempt (pNickName .>> notFollowedBy (pchar '.'))) 
+    (pNickName .>>? notFollowedBy (pchar '.'))
     <|> pServerName
 
 // any octet except NUL, CR, LF, " " and "@"
@@ -120,7 +120,7 @@ let pPrefixUserPart : Parser<_> =
 
 // prefix     =  servername / ( nickname [ [ "!" user ] "@" host ] )
 let pPrefix : Parser<_> =
-    (attempt (pServerName .>> notFollowedBy (anyOf ['!'; '@']))
+    (pServerName .>>? notFollowedBy (anyOf ['!'; '@'])
     |>> (fun name -> 
         // the only thing that differentiates the nickname case vs the server name case is the '.' character, which is not allowed in nicknames
         if name.Contains(".") then 
