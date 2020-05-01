@@ -99,3 +99,5 @@ let pTarget =
     (attempt (pNickName .>> notFollowedBy (pchar '.'))) 
     <|> pServerName
 
+// any octet except NUL, CR, LF, " " and "@"
+let pUser : Parser<_> = many1Chars (noneOf [ '\x00'; '\r'; '\n'; ' '; '@' ])

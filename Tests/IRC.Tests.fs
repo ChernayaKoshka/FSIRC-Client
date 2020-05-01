@@ -175,6 +175,24 @@ let ``basic parsing`` =
                     "tolsun.oulu.fi", "tolsun.oulu.fi"
                     "ircd.stealth.net", "ircd.stealth.net"
                 ]
+            testCase "pUser compared"
+            <| Helpers.parseAndCompare (pUser .>> eof)
+                [
+                    "a23456789", "a23456789"
+                    "a", "a"
+                    "bcde{}aaaaaaaaaaaa", "bcde{}aaaaaaaaaaaa"
+                    "~!#$%^&*()_+{}|:\"<>?QWERetbezxstvxzc", "~!#$%^&*()_+{}|:\"<>?QWERetbezxstvxzc"
+                ]
+            testCase "pUser failures"
+            <| Helpers.parseAndExpectFailure (pUser .>> eof)
+                [
+                    ""
+                    "\x00COOL"
+                    "\rNEAT"
+                    "abc\n"
+                    "Dont@Me"
+                    "Kevin y"
+                ]
         ]
         // testList "prefix parsing" [
         //     testCase "servername"
