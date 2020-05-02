@@ -72,8 +72,22 @@ type UserTarget =
         ServerName: ServerName option
     }
 
-// TODO: Should be a DU of whatver $/# mean
-type TargetMask = char
+type TargetType =
+    | Host
+    | Channel
+
+type MaskPart =
+    | WildOne
+    | WildMany
+    | NonWild of char
+
+type Mask = MaskPart list
+
+type TargetMask =
+    {
+        Target: TargetType
+        Mask: Mask
+    }
 
 type MsgTo =
     | Channel of Channel
