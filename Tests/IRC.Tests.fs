@@ -299,6 +299,7 @@ let ``basic parsing`` =
             <| Helpers.parseAndCompare (pPrefix .>> eof)
                 [
                     ("WiZ@tolsun.oulu.fi", Prefix.User ({ NickName = "WiZ"; User = None; Host = Some (HostName "tolsun.oulu.fi") }))
+                    ("WiZ`^@tolsun.oulu.fi", Prefix.User ({ NickName = "WiZ`^"; User = None; Host = Some (HostName "tolsun.oulu.fi") }))
                     ("syrk@millennium.stealth.net", Prefix.User ({ NickName = "syrk"; User = None; Host = Some (HostName "millennium.stealth.net") }))
                     ("Angel@irc.org", Prefix.User ({ NickName = "Angel"; User = None; Host = Some (HostName "irc.org") }))
 
@@ -327,4 +328,75 @@ let ``basic parsing`` =
                 ]
         ]
 
+        testList "pMessage parsing" [
+            testCase "pMessage compared"
+            <| Helpers.parseAndCompare (pMessage .>> eof)
+                [
+                    // Courtesy of
+                    ":Tracey`^!me@68.178.52.73 PRIVMSG #game1 :She's dead. Keep laughing.\r\n",
+                        {
+                            Prefix =
+                                User
+                                    {
+                                        NickName = "Tracey`^";
+                                        User = Some "me";
+                                        Host = Some <| HostAddress (IPAddress.Parse("68.178.52.73"))
+                                    }
+                               |> Some
+                            Command = TextCommand "PRIVMSG"
+                            Params = { Middle = [ "#game1" ]; Trailing = Some "She's dead. Keep laughing." }
+                        }
+                    ":AlcarGM!alcar@g42-70-262-54.ok.comcast.net PRIVMSG Brisby :And no, Tracey\r\n",
+                        {
+                            Prefix =
+                                User
+                                    {
+                                        NickName = "AlcarGM";
+                                        User = Some "alcar";
+                                        Host = Some <| HostName "g42-70-262-54.ok.comcast.net"
+                                    }
+                                |> Some
+                            Command = TextCommand "PRIVMSG"
+                            Params = { Middle = [ "Brisby" ]; Trailing = Some "And no, Tracey" }
+                        }
+                    "PRIVMSG #game1 :(( Keep laughing?!? YOU INSENSITIVE CLOD!!! ))\r\n",
+                        {
+                            Prefix = None
+                            Command = TextCommand "PRIVMSG"
+                            Params = { Middle = [ "#game1" ]; Trailing = Some "(( Keep laughing?!? YOU INSENSITIVE CLOD!!! ))" }
+                        }
+                    "PRIVMSG Gandalf[bot] :Note to Fennec: Where have you been?!?!?!\r\n",
+                        {
+                            Prefix = None
+                            Command = TextCommand "PRIVMSG"
+                            Params = { Middle = [ "Gandalf[bot]" ]; Trailing = Some "Note to Fennec: Where have you been?!?!?!" }
+                        }
+                    "PRIVMSG JacobRiis!~fennec@fennec.computer.wfu.edu :I know where you sleep!!!\r\n",
+                        {
+                            Prefix = None
+                            Command = TextCommand "PRIVMSG"
+                            Params = { Middle = [ "JacobRiis!~fennec@fennec.computer.wfu.edu" ]; Trailing = Some "I know where you sleep!!!" }
+                        }
+
+                    // from my own UnrealIRCd Server
+                    "PRIVMSG # :test2\r\n",
+                        {
+                            Prefix = None
+                            Command = TextCommand "PRIVMSG"
+                            Params = { Middle = [ "#" ]; Trailing = Some "test2" }
+                        }
+                    "PING LAG3501273176\r\n",
+                        {
+                            Prefix = None
+                            Command = TextCommand "PING"
+                            Params = { Middle = [ "LAG3501273176" ]; Trailing = None }
+                        }
+                    ":irc.foonet.com PONG irc.foonet.com :LAG3501273176\r\n",
+                        {
+                            Prefix = ServerName "irc.foonet.com" |> Some
+                            Command = TextCommand "PONG"
+                            Params = { Middle = [ "irc.foonet.com" ]; Trailing = Some "LAG3501273176" }
+                        }
+                ]
+        ]
     ]

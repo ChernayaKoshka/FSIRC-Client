@@ -121,7 +121,8 @@ let pHost = (attempt (pHostAddr |>> HostAddress)) <|> (pHostName |>> HostName)
 
 let pNickName : Parser<string> =
     (pLetter <|> pSpecial)
-    .>>. manyMinMaxSatisfy 0 8 (fun c -> List.contains c (letter @ digit @ special @ [ '-' ]))
+    .>>. manyMinMaxSatisfy 0 8 (fun c ->
+        List.contains c (letter @ digit @ special @ [ '-' ]))
     |>> (fun (start, rest) -> string start + rest)
 
 let pTarget =
@@ -179,7 +180,7 @@ let pParams : Parser<_> =
 
 // prefix     =  servername / ( nickname [ [ "!" user ] "@" host ] )
 let pPrefix : Parser<_> =
-    (pServerName .>>? notFollowedBy (anyOf ['!'; '@'])
+    (pServerName .>>? notFollowedBy (anyOf (['!'; '@'] @ special))
     |>> (fun name ->
         // the only thing that differentiates the nickname case vs the server name case is the '.' character, which is not allowed in nicknames
         if name.Contains(".") then
@@ -192,3 +193,11 @@ let pPrefix : Parser<_> =
 let pCommand : Parser<_> =
     (many1Chars pLetter |>> TextCommand)
     <|> (manyMinMaxSatisfy 3 3 Char.IsDigit |>> (uint32 >> IntCommand))
+
+let pMessage : Parser<_> =
+    pipe3
+        (opt (pchar ':' >>. pPrefix .>> pSpace))
+        pCommand
+        pParams
+       (fun prefix command ``params`` -> { Prefix = prefix; Command = command; Params = ``params`` })
+    .>> pCrLf
