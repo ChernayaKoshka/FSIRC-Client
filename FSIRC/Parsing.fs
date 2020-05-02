@@ -239,3 +239,41 @@ let pChannel : Parser<_> =
 // targetmask =  ( "$" / "#" ) mask
 //                 ; see details on allowed masks in section 3.3.1
 let pTargetMask : Parser<_> = anyOf [ '$'; '#' ]
+
+// msgto      =  channel / ( user [ "%" host ] "@" servername )
+// msgto      =/ ( user "%" host ) / targetmask
+// msgto      =/ nickname / ( nickname "!" user "@" host )
+
+let pMsgToUserHostPart : Parser<_> =
+    pchar '%' >>. pHost
+
+let pMsgToServerNamePart : Parser<_> =
+    pchar '@' >>. pServerName
+
+let pMsgToUserInfo : Parser<Host option * ServerName option> = fun stream ->
+    let reply = opt pMsgToUserHostPart stream
+    if reply.Status <> Ok then
+        Reply(reply.Status, reply.Error)
+    else
+        if stream.Peek() = '@' then
+            let reply' = pMsgToServerNamePart stream
+            if reply'.Status <> Ok then
+                Reply(reply'.Status, reply'.Error)
+            else
+                Reply((reply.Result, Some reply'.Result))
+        else if reply.Result = None then
+            Reply(Error, messageError "Expected either a HostName, ServerName, or a HostName followed by a ServerName")
+        else
+            Reply((reply.Result, None))
+
+let pMsgToUser : Parser<_> =
+    pUser
+    .>>. pMsgToUserInfo
+    |>> (fun (user, info) ->
+        let host, server = info
+        {
+            User = user
+            Host = host
+            ServerName = server
+        }
+    )

@@ -466,4 +466,16 @@ let ``basic parsing`` =
                         }
                 ]
         ]
+
+        testList "msgto parsing" [
+            testCase "pMsgToUser compared"
+            <| Helpers.parseAndCompare (pMsgToUser .>> eof)
+                [
+                    "WiZ%192.168.0.1", { User = "WiZ"; Host = HostAddress (IPAddress.Parse("192.168.0.1")) |> Some; ServerName = None }
+                    "WiZ%192.168.0.1@irc.foonet.com", { User = "WiZ"; Host = HostAddress (IPAddress.Parse("192.168.0.1")) |> Some; ServerName = Some "irc.foonet.com" }
+                    "WiZ%abc-123.def.456", { User = "WiZ"; Host = HostName "abc-123.def.456" |> Some; ServerName = None }
+                    "WiZ%abc-123.def.456@abc-123.def.456", { User = "WiZ"; Host = HostName "abc-123.def.456" |> Some; ServerName = Some "abc-123.def.456" }
+                    "WiZ@irc.foonet.com", { User = "WiZ"; Host = None; ServerName = Some "irc.foonet.com" }
+                ]
+        ]
     ]
