@@ -11,7 +11,7 @@ type UserState =
 type Parser<'t> = Parser<'t, UserState>
 
 let maxArgsNotReached (userState:UserState) : bool =
-    userState.ArgsParsed < 15
+    userState.ArgsParsed <= 14
 
 let maxArgsReached (userState:UserState) : bool =
     userState.ArgsParsed = 14
@@ -124,7 +124,7 @@ let pNickName : Parser<string> =
     .>>. manyMinMaxSatisfy 0 8 (fun c -> List.contains c (letter @ digit @ special @ [ '-' ]))
     |>> (fun (start, rest) -> string start + rest)
 
-let pTarget = 
+let pTarget =
                                                // v prevents this parser from failing when it encounters a '.' which indicates that it is potentially a server name
     (pNickName .>>? notFollowedBy (pchar '.'))
     <|> pServerName
@@ -162,19 +162,32 @@ let pTrailingParam =
             (pchar ':' >>. pTrailing) stream
     )
 
+let pMiddleParamWithUserState : Parser<_> =
+    pSpace
+    .>>? notFollowedBy (pchar ':')
+    .>> incrementArgCount
+    .>>? userStateSatisfies maxArgsNotReached
+    >>. pMiddle
+
+// params     =  *14( SPACE middle ) [ SPACE ":" trailing ]
+// params     =/ 14( SPACE middle ) [ SPACE [ ":" ] trailing ]
+let pParams : Parser<_> =
+     many pMiddleParamWithUserState
+     .>>. opt pTrailingParam
+     .>> resetArgCount
 
 // prefix     =  servername / ( nickname [ [ "!" user ] "@" host ] )
 let pPrefix : Parser<_> =
     (pServerName .>>? notFollowedBy (anyOf ['!'; '@'])
-    |>> (fun name -> 
+    |>> (fun name ->
         // the only thing that differentiates the nickname case vs the server name case is the '.' character, which is not allowed in nicknames
-        if name.Contains(".") then 
-            ServerName name 
-        else 
+        if name.Contains(".") then
+            ServerName name
+        else
             NickNameOrServerName name ))
     <|> pPrefixUserPart
 
 // command    =  1*letter / 3digit
 let pCommand : Parser<_> =
-    (many1Chars pLetter |>> TextCommand) 
+    (many1Chars pLetter |>> TextCommand)
     <|> (manyMinMaxSatisfy 3 3 Char.IsDigit |>> (uint32 >> IntCommand))

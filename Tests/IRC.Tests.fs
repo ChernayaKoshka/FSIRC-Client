@@ -4,6 +4,7 @@ open Expecto
 open FSIRC
 open FParsec
 open FSIRC.Parsing
+open System
 open System.Net
 
 [<Tests>]
@@ -165,7 +166,7 @@ let ``basic parsing`` =
                     "`Ne4t^1", "`Ne4t^1"
                     "[]\\`_^{|", "[]\\`_^{|"
                     "}cool{", "}cool{"
-                    
+
                     "abc.123.def.456", "abc.123.def.456"
                     "abc-123.def-456", "abc-123.def-456"
                     "abc-456", "abc-456"
@@ -234,7 +235,7 @@ let ``basic parsing`` =
                     "I still don't get to have newlines, though \r"
                     "Or naughty nulls!\x00"
                 ]
-            testCase "pTrailingParam" (fun _ ->
+            testCase "pTrailingParam compared" (fun _ ->
                 [
                     " :Trailing !", "Trailing !", { ArgsParsed = 1 }
                     " :Trailing !", "Trailing !", { ArgsParsed = 14 }
@@ -249,6 +250,30 @@ let ``basic parsing`` =
             )
         ]
 
+        testList "params parsing" [
+            testCase "pParams compared"
+            <| Helpers.parseAndCompare (pParams .>> eof)
+                [
+                    "", ([], None)
+                    " :Trailing params", ([], Some "Trailing params")
+                    " test", ([ "test" ], None)
+                    " test another!:", ([ "test"; "another!:" ], None)
+                    " test anot:her!", ([ "test"; "anot:her!" ], None)
+                    " 1 2 3 4 5 6 7 8 9 10 11 12 :13 14", ([ "1"; "2"; "3"; "4"; "5"; "6"; "7"; "8"; "9"; "10"; "11"; "12"; ], Some "13 14")
+                    " 1 2 3 4 5 6 7::: 8:8 9 10 11 12 :13 : : : :: : ::::: 14", ([ "1"; "2"; "3"; "4"; "5"; "6"; "7:::"; "8:8"; "9"; "10"; "11"; "12"; ], Some "13 : : : :: : ::::: 14")
+                    " 1 2 3 4 5 6 7 8 9 10 11 12 13 14", ([ "1"; "2"; "3"; "4"; "5"; "6"; "7"; "8"; "9"; "10"; "11"; "12"; "13"; "14" ], None)
+                    " 1 2 3 4 5 6 7 8 9 10 11 12 13 14 this is really cool because it's implicit!", ([ "1"; "2"; "3"; "4"; "5"; "6"; "7"; "8"; "9"; "10"; "11"; "12"; "13"; "14" ], Some "this is really cool because it's implicit!")
+                    " 1 2 3 4 5 6 7 8 9 10 11 12 13 14 :this is really cool because it's explicit!", ([ "1"; "2"; "3"; "4"; "5"; "6"; "7"; "8"; "9"; "10"; "11"; "12"; "13"; "14" ], Some "this is really cool because it's explicit!")
+                ]
+            testCase "pParams failures"
+            <| Helpers.parseAndExpectFailure (pParams .>> eof)
+                [
+                    "\r"
+                    "\n"
+                    "  "
+                ]
+        ]
+
         testList "prefix parsing" [
             testCase "servername"
             <| Helpers.parseAndCompare (pPrefix .>> eof)
@@ -257,7 +282,7 @@ let ``basic parsing`` =
                     "csd.bu.edu", Prefix.ServerName "csd.bu.edu"
                     "tolsun.oulu.fi", Prefix.ServerName "tolsun.oulu.fi"
                     "ircd.stealth.net", Prefix.ServerName "ircd.stealth.net"
-                    
+
                     "abc.123.def.456", Prefix.ServerName "abc.123.def.456"
                     "abc-123.def-456", Prefix.ServerName "abc-123.def-456"
                     "abc-123.def.456", Prefix.ServerName "abc-123.def.456"
@@ -276,11 +301,11 @@ let ``basic parsing`` =
                     ("WiZ@tolsun.oulu.fi", Prefix.User ({ NickName = "WiZ"; User = None; Host = Some (HostName "tolsun.oulu.fi") }))
                     ("syrk@millennium.stealth.net", Prefix.User ({ NickName = "syrk"; User = None; Host = Some (HostName "millennium.stealth.net") }))
                     ("Angel@irc.org", Prefix.User ({ NickName = "Angel"; User = None; Host = Some (HostName "irc.org") }))
-        
+
                     ("WiZ@2600:1005:b062:61e4:74d7:f292:802c:fbfd", Prefix.User ({ NickName = "WiZ"; User = None; Host = Some (HostAddress (IPAddress.Parse("2600:1005:b062:61e4:74d7:f292:802c:fbfd")))}))
                     ("syrk@2600:1005:b062:61e4:74d7:f292:802c:fbfd", Prefix.User ({ NickName = "syrk"; User = None; Host = Some (HostAddress (IPAddress.Parse("2600:1005:b062:61e4:74d7:f292:802c:fbfd")))}))
                     ("Angel@2600:1005:b062:61e4:74d7:f292:802c:fbfd", Prefix.User ({ NickName = "Angel"; User = None; Host = Some (HostAddress (IPAddress.Parse("2600:1005:b062:61e4:74d7:f292:802c:fbfd")))}))
-        
+
                     ("WiZ@192.168.0.1", Prefix.User ({ NickName = "WiZ"; User = None; Host = Some (HostAddress (IPAddress.Parse("192.168.0.1")) )}))
                     ("syrk@192.168.0.1", Prefix.User ({ NickName = "syrk"; User = None; Host = Some (HostAddress (IPAddress.Parse("192.168.0.1")) )}))
                     ("Angel@192.168.0.1", Prefix.User ({ NickName = "Angel"; User = None; Host = Some (HostAddress (IPAddress.Parse("192.168.0.1")) )}))
@@ -291,11 +316,11 @@ let ``basic parsing`` =
                     ("WiZ!jto@tolsun.oulu.fi", Prefix.User ({ NickName = "WiZ"; User = Some "jto"; Host = Some (HostName "tolsun.oulu.fi") }))
                     ("syrk!kalt@millennium.stealth.net", Prefix.User ({ NickName = "syrk"; User = Some "kalt"; Host = Some (HostName "millennium.stealth.net") }))
                     ("Angel!wings@irc.org", Prefix.User ({ NickName = "Angel"; User = Some "wings"; Host = Some (HostName "irc.org") }))
-        
+
                     ("WiZ!jto@2600:1005:b062:61e4:74d7:f292:802c:fbfd", Prefix.User ({ NickName = "WiZ"; User = Some "jto"; Host = Some (HostAddress (IPAddress.Parse("2600:1005:b062:61e4:74d7:f292:802c:fbfd")))}))
                     ("syrk!kalt@2600:1005:b062:61e4:74d7:f292:802c:fbfd", Prefix.User ({ NickName = "syrk"; User = Some "kalt"; Host = Some (HostAddress (IPAddress.Parse("2600:1005:b062:61e4:74d7:f292:802c:fbfd")))}))
                     ("Angel!wings@2600:1005:b062:61e4:74d7:f292:802c:fbfd", Prefix.User ({ NickName = "Angel"; User = Some "wings"; Host = Some (HostAddress (IPAddress.Parse("2600:1005:b062:61e4:74d7:f292:802c:fbfd")))}))
-        
+
                     ("WiZ!jto@192.168.0.1", Prefix.User ({ NickName = "WiZ"; User = Some "jto"; Host = Some (HostAddress (IPAddress.Parse("192.168.0.1")) )}))
                     ("syrk!kalt@192.168.0.1", Prefix.User ({ NickName = "syrk"; User = Some "kalt"; Host = Some (HostAddress (IPAddress.Parse("192.168.0.1")) )}))
                     ("Angel!wings@192.168.0.1", Prefix.User ({ NickName = "Angel"; User = Some "wings"; Host = Some (HostAddress (IPAddress.Parse("192.168.0.1")) )}))
