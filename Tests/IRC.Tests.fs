@@ -288,8 +288,8 @@ let ``basic parsing`` =
             testCase "pTargetMask compared"
             <| Helpers.parseAndCompare (pTargetMask .>> eof)
                 [
-                    "$", "$"
-                    "#", "#"
+                    "$", '$'
+                    "#", '#'
                 ]
         ]
 
