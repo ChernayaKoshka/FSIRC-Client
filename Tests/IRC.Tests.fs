@@ -182,12 +182,13 @@ let ``basic parsing`` =
                     "a23456789", "a23456789"
                     "a", "a"
                     "bcde{}aaaaaaaaaaaa", "bcde{}aaaaaaaaaaaa"
-                    "~!#$%^&*()_+{}|:\"<>?QWERetbezxstvxzc", "~!#$%^&*()_+{}|:\"<>?QWERetbezxstvxzc"
+                    "~!#$^&*()_+{}|:\"<>?QWERetbezxstvxzc", "~!#$^&*()_+{}|:\"<>?QWERetbezxstvxzc"
                 ]
             testCase "pUser failures"
             <| Helpers.parseAndExpectFailure (pUser .>> eof)
                 [
                     ""
+                    "percentagesarein%!"
                     "\x00COOL"
                     "\rNEAT"
                     "abc\n"

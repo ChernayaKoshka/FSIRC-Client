@@ -132,7 +132,9 @@ let pTarget =
     <|> pServerName
 
 // any octet except NUL, CR, LF, " " and "@"
-let pUser : Parser<_> = many1Chars (noneOf [ '\x00'; '\r'; '\n'; ' '; '@' ])
+// in practice, it seems that [0-9] [a-z] [A-Z] [_] [-] or [.] are the only characters allowed
+// for simplicty's sake, I'm just going to exclude '%', because it makes it easier to parse messages
+let pUser : Parser<_> = many1Chars (noneOf [ '\x00'; '\r'; '\n'; ' '; '@'; '%' ])
 
 // ( nickname [ [ "!" user ] "@" host ] )
 let pPrefixUserPart : Parser<_> =
