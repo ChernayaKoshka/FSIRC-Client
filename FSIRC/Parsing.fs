@@ -144,7 +144,7 @@ let pPrefixUserPart : Parser<_> =
             match additional with
             | Some (user, host) -> user, Some host
             | None -> None, None
-        User
+        Prefix.User
             {
                 NickName = nick
                 User = user
