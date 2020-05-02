@@ -13,6 +13,7 @@ type Command =
             | TextCommand str -> str
             | IntCommand int -> int.ToString()
 
+type NickName = string
 type HostName = string
 type ServerName = HostName
 type HostAddress = IPAddress
@@ -25,7 +26,7 @@ type User = string
 
 type UserInfo =
     {
-        NickName: string
+        NickName: NickName
         User: User option
         Host: Host option
     }
@@ -63,3 +64,19 @@ type Channel =
         Name : string
         Postfix : string option
     }
+
+type UserTarget =
+    {
+        User: User
+        Host: Host option
+        ServerName: ServerName option
+    }
+
+// TODO: Should be a DU of whatver $/# mean
+type TargetMask = char
+
+type MsgTo =
+    | Channel of Channel
+    | User of UserTarget
+    | TargetMask of TargetMask
+    | ServerUser of UserInfo
