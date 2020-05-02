@@ -46,13 +46,13 @@ type Message =
     {
         Prefix : Prefix option
         Command : Command
-        Parameters : Params
+        Params : Params
     }
     with
         override this.ToString() =
             let prefix = string this.Prefix
             let command = string this.Command
 
-            let args = (String.concat " " this.Parameters.Middle) + (match this.Parameters.Trailing with Some trailing -> " :" + trailing | None -> String.Empty)
+            let args = (String.concat " " this.Params.Middle) + (match this.Params.Trailing with Some trailing -> " :" + trailing | None -> String.Empty)
 
             sprintf "%s %s %s" prefix command args
