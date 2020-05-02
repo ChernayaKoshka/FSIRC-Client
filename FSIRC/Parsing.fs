@@ -236,9 +236,52 @@ let pChannel : Parser<_> =
         (opt (pchar ':' >>. pChanString))
         (fun prefix name postfix -> { Prefix = prefix; Name = name; Postfix = postfix })
 
+// matchone   =  %x01-FF
+//                 ; matches wildone
+let pMatchOne : Parser<_> = anyOf ['\x01'..'\xFF']
+
+// matchmany  =  *matchone
+//                 ; matches wildmany
+let pMatchMany : Parser<_> = manyChars pMatchOne
+
+// noesc      =  %x01-5B / %x5D-FF
+//                 ; any octet except NUL and "\"
+let pNoEsc : Parser<_> = noneOf noEsc
+
+// nowild     =  %x01-29 / %x2B-3E / %x40-FF
+//                 ; any octet except NUL, "*", "?"
+let pNoWild : Parser<_> = noneOf [ '\x00'; '*'; '?' ]
+
+// wildone    =  %x3F
+let pWildOne : Parser<_> = pchar '?'
+
+// wildmany   =  %x2A
+let pWildMany : Parser<_> = pchar '*'
+
+let previousCharNoEsc : Parser<_> = previousCharSatisfiesNot (fun c -> List.contains c noEsc)
+
+// mask       =  *( nowild / noesc wildone / noesc wildmany )
+let pMask =
+    many <|
+    choice
+        [
+            stringReturn "\\*" (NonWild '*')
+            stringReturn "\\?" (NonWild '?')
+            pNoWild |>> NonWild
+            (pWildOne >>% WildOne)
+            (pWildMany >>% WildMany)
+        ]
+
+let pTargetMaskTarget : Parser<_> =
+    (charReturn '$' TargetType.Host) <|> (charReturn '#' TargetType.Channel)
+
 // targetmask =  ( "$" / "#" ) mask
 //                 ; see details on allowed masks in section 3.3.1
-let pTargetMask : Parser<_> = anyOf [ '$'; '#' ]
+let pTargetMask : Parser<_> =
+    pipe2
+        pTargetMaskTarget
+        pMask
+        (fun target mask -> { Target = target; Mask = mask })
 
 // msgto      =  channel / ( user [ "%" host ] "@" servername )
 // msgto      =/ ( user "%" host ) / targetmask
