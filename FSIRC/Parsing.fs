@@ -41,6 +41,8 @@ let hexDigit = ['A'..'F'] @ ['a'..'f'] @ digit
 
 let special = ['['..'`'] @ ['{'..'}']
 
+let noEsc = [ '\x00'; '\\' ]
+
 let pLetter : Parser<_> = anyOf letter
 let pDigit : Parser<_> = anyOf digit
 let pLetterOrDigit : Parser<_> = anyOf (digit @ letter)
