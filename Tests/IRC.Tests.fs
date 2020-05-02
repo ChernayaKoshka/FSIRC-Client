@@ -395,7 +395,7 @@ let ``basic parsing`` =
                 ]
         ]
 
-        testList "pMessage parsing" [
+        testList "message parsing" [
             testCase "pMessage compared"
             <| Helpers.parseAndCompare (pMessage .>> eof)
                 [
@@ -403,7 +403,7 @@ let ``basic parsing`` =
                     ":Tracey`^!me@68.178.52.73 PRIVMSG #game1 :She's dead. Keep laughing.\r\n",
                         {
                             Prefix =
-                                User
+                                Prefix.User
                                     {
                                         NickName = "Tracey`^";
                                         User = Some "me";
@@ -416,7 +416,7 @@ let ``basic parsing`` =
                     ":AlcarGM!alcar@g42-70-262-54.ok.comcast.net PRIVMSG Brisby :And no, Tracey\r\n",
                         {
                             Prefix =
-                                User
+                                Prefix.User
                                     {
                                         NickName = "AlcarGM";
                                         User = Some "alcar";
@@ -460,7 +460,7 @@ let ``basic parsing`` =
                         }
                     ":irc.foonet.com PONG irc.foonet.com :LAG3501273176\r\n",
                         {
-                            Prefix = ServerName "irc.foonet.com" |> Some
+                            Prefix = Prefix.ServerName "irc.foonet.com" |> Some
                             Command = TextCommand "PONG"
                             Params = { Middle = [ "irc.foonet.com" ]; Trailing = Some "LAG3501273176" }
                         }
