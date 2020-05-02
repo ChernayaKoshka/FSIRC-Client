@@ -152,6 +152,18 @@ let pPrefixUserPart : Parser<_> =
                 User = user
                 Host = host
             })
+let pAllUserParts : Parser<_> =
+    pipe3
+        pNickName
+        (pchar '!' >>. pUser)
+        (pchar '@' >>. pHost)
+        (fun nick user host ->
+            {
+                NickName = nick
+                User = Some user
+                Host = Some host
+            }
+        )
 
 // middle     =  nospcrlfcl *( ":" / nospcrlfcl )
 let pMiddle =
