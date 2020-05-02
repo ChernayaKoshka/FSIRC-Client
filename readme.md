@@ -13,7 +13,7 @@
 | target     |          ✔           |
 | msgtarget  |          ❌          |
 | msgto      |          ❌          |
-| channel    |          ❌          |
+| channel    |          ✔           |
 | servername |          ✔           |
 | host       |          ✔           |
 | hostname   |          ✔           |
@@ -22,22 +22,22 @@
 | ip4addr    |          ✔           |
 | ip6addr    |          ✔           |
 | nickname   |          ✔           |
-| targetmask |          ❌          |
-| chanstring |          ❌          |
-| channelid  |          ❌          |
+| targetmask |          ✔           |
+| chanstring |          ✔           |
+| channelid  |          ✔           |
 | user       |          ✔           |
 | key        |          ❌          |
 | letter     |          ✔           |
 | digit      |          ✔           |
 | hexdigit   |          ✔           |
 | special    |          ✔           |
-| mask       |          ❌          |
-| wildone    |          ❌          |
-| wildmany   |          ❌          |
-| nowild     |          ❌          |
-| noesc      |          ❌          |
-| matchone   |          ❌          |
-| matchmany  |          ❌          |
+| mask       |          ✔           |
+| wildone    |          ✔           |
+| wildmany   |          ✔           |
+| nowild     |          ✔           |
+| noesc      |          ✔           |
+| matchone   |          ✔           |
+| matchmany  |          ✔           |
 
 # IRC ABNF Spec
 ```
