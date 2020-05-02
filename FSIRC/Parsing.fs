@@ -216,3 +216,20 @@ let pChanString : Parser<_> =
         |> List.map char
         |> List.except [ '\x00'; '\b'; '\r'; '\n'; ' '; ','; ':' ]
     manyMinMaxSatisfy 0 49 (fun c -> List.contains c valid)
+
+let pChannelPrefix : Parser<_> =
+    choice
+        [
+            pstring "#"
+            pstring "+"
+            pipe2 (pstring "!") pChannelId (+)
+            pstring "&"
+        ]
+
+// channel    =  ( "#" / "+" / ( "!" channelid ) / "&" ) chanstring [ ":" chanstring ]
+let pChannel : Parser<_> =
+    pipe3
+        pChannelPrefix
+        pChanString
+        (opt (pchar ':' >>. pChanString))
+        (fun prefix name postfix -> { Prefix = prefix; Name = name; Postfix = postfix })

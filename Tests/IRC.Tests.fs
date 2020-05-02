@@ -286,6 +286,30 @@ let ``basic parsing`` =
                 ]
         ]
 
+        testList "channel parsing" [
+            testCase "pChannel compared"
+            <| Helpers.parseAndCompare (pChannel .>> eof)
+                [
+                    "#", { Prefix = "#"; Name = String.Empty; Postfix = None }
+                    "#:", { Prefix = "#"; Name = String.Empty; Postfix = Some String.Empty }
+                    "#aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", { Prefix = "#"; Name = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"; Postfix = None }
+                    "#aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", { Prefix = "#"; Name = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"; Postfix = Some "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" }
+                    "+Channel", { Prefix = "+"; Name = "Channel"; Postfix = None }
+                    "+Channel:Postfix", { Prefix = "+"; Name = "Channel"; Postfix = Some "Postfix" }
+                    "&Channel", { Prefix = "&"; Name = "Channel"; Postfix = None }
+                    "&Channel:Postfix", { Prefix = "&"; Name = "Channel"; Postfix = Some "Postfix" }
+                    "!CID01Channel", { Prefix = "!CID01"; Name = "Channel"; Postfix = None }
+                    "!CID01Channel:Postfix", { Prefix = "!CID01"; Name = "Channel"; Postfix = Some "Postfix" }
+                ]
+            testCase "pChannel failures"
+            <| Helpers.parseAndExpectFailure (pChannel .>> eof)
+                [
+                    "!"
+                    "#::"
+                    "#Chan:nel:Post:Fix"
+                ]
+        ]
+
         testList "params parsing" [
             testCase "pParams compared"
             <| Helpers.parseAndCompare (pParams .>> eof)
