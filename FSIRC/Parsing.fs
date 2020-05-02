@@ -233,3 +233,7 @@ let pChannel : Parser<_> =
         pChanString
         (opt (pchar ':' >>. pChanString))
         (fun prefix name postfix -> { Prefix = prefix; Name = name; Postfix = postfix })
+
+// targetmask =  ( "$" / "#" ) mask
+//                 ; see details on allowed masks in section 3.3.1
+let pTargetMask : Parser<_> = anyOf [ '$'; '#' ]

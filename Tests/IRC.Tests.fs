@@ -284,6 +284,12 @@ let ``basic parsing`` =
                     "OhNoAComma!,"
                     "ACOLON???:AAA"
                 ]
+            testCase "pTargetMask compared"
+            <| Helpers.parseAndCompare (pTargetMask .>> eof)
+                [
+                    "$", "$"
+                    "#", "#"
+                ]
         ]
 
         testList "channel parsing" [
