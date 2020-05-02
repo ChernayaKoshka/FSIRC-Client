@@ -56,3 +56,10 @@ type Message =
             let args = (String.concat " " this.Params.Middle) + (match this.Params.Trailing with Some trailing -> " :" + trailing | None -> String.Empty)
 
             sprintf "%s %s %s" prefix command args
+
+type Channel =
+    {
+        Prefix : string
+        Name : string
+        Postfix : string option
+    }
