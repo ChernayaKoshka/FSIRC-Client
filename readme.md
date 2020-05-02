@@ -1,10 +1,10 @@
 # Parser Checklist:
 | Rule       | Parser implemented?  |
 | ---------- | -------------------- |
-| message    |          ❌          |
+| message    |          ✔           |
 | prefix     |          ✔           |
 | command    |          ✔           |
-| params     |          ❌          |
+| params     |          ✔           |
 | nospcrlfcl |          ✔           |
 | middle     |          ✔           |
 | trailing   |          ✔           |
