@@ -248,6 +248,25 @@ let ``basic parsing`` =
                     Expect.equal result expected "Not equal!"
                 )
             )
+            testCase "pChannelId compared"
+            <| Helpers.parseAndCompare (pChannelId .>> eof)
+                [
+                    "ABCDE", "ABCDE"
+                    "12345", "12345"
+                    "AB34E", "AB34E"
+                ]
+            testCase "pChannelId failures"
+            <| Helpers.parseAndExpectFailure (pChannelId .>> eof)
+                [
+                    "\x00NONO"
+                    "\rNONO"
+                    "NO\nNO"
+                    "NO NO"
+                    "NO:NO"
+                    "MORETHAN5"
+                    "FEW"
+                    "lower"
+                ]
         ]
 
         testList "params parsing" [

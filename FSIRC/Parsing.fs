@@ -30,11 +30,12 @@ let manyCharsStartsWith (start: Parser<char>) (rest: Parser<char>) : Parser<_> =
     start .>>. manyChars rest
     |>> (fun (a,b) -> string a + b)
 
-let letter =
-    (['A'..'Z'] @ ['a'..'z'])
+let upperLetter = ['A'..'Z']
+let lowerLetter = ['a'..'z']
 
-let digit =
-    ['0'..'9']
+let letter = upperLetter @ lowerLetter
+
+let digit = ['0'..'9']
 
 let hexDigit = ['A'..'F'] @ ['a'..'f'] @ digit
 
@@ -201,3 +202,8 @@ let pMessage : Parser<_> =
         pParams
        (fun prefix command ``params`` -> { Prefix = prefix; Command = command; Params = ``params`` })
     .>> pCrLf
+
+// channelid  = 5( %x41-5A / digit )   ; 5( A-Z / 0-9 )
+let pChannelId : Parser<_> =
+    manyMinMaxSatisfy 5 5 (fun c -> List.contains c (upperLetter @ digit))
+
