@@ -267,6 +267,23 @@ let ``basic parsing`` =
                     "FEW"
                     "lower"
                 ]
+            testCase "pChanString compared"
+            <| Helpers.parseAndCompare (pChanString .>> eof)
+                [
+                    String.Empty, String.Empty
+                    "`1234567890-=[]\\;'\"", "`1234567890-=[]\\;'\""
+                    // 49 characters
+                    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                ]
+            testCase "pChanString failures"
+            <| Helpers.parseAndExpectFailure (pChanString .>> eof)
+                [
+                    "ABC\bDEF"
+                    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" // 50 characters
+                    "\x00BC\x00"
+                    "OhNoAComma!,"
+                    "ACOLON???:AAA"
+                ]
         ]
 
         testList "params parsing" [

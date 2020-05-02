@@ -195,6 +195,7 @@ let pCommand : Parser<_> =
     (many1Chars pLetter |>> TextCommand)
     <|> (manyMinMaxSatisfy 3 3 Char.IsDigit |>> (uint32 >> IntCommand))
 
+// message    =  [ ":" prefix SPACE ] command [ params ] crlf
 let pMessage : Parser<_> =
     pipe3
         (opt (pchar ':' >>. pPrefix .>> pSpace))
@@ -207,3 +208,11 @@ let pMessage : Parser<_> =
 let pChannelId : Parser<_> =
     manyMinMaxSatisfy 5 5 (fun c -> List.contains c (upperLetter @ digit))
 
+//chanstring = *49(%x01-06 / %x08-09 / %x0B-0C / %x0E-1F / %x21-2B / %x2D-39 / %x3B-FF)
+// ; any octet except NUL, BELL, CR, LF, " ", "," and ":"
+let pChanString : Parser<_> =
+    let valid =
+        [ 0x00..0xFF ]
+        |> List.map char
+        |> List.except [ '\x00'; '\b'; '\r'; '\n'; ' '; ','; ':' ]
+    manyMinMaxSatisfy 0 49 (fun c -> List.contains c valid)
