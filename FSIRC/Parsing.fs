@@ -175,6 +175,7 @@ let pParams : Parser<_> =
      many pMiddleParamWithUserState
      .>>. opt pTrailingParam
      .>> resetArgCount
+     |>> (fun (middle, trailing) -> { Middle = middle; Trailing = trailing })
 
 // prefix     =  servername / ( nickname [ [ "!" user ] "@" host ] )
 let pPrefix : Parser<_> =

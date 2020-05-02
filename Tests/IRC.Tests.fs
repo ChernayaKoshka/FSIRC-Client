@@ -254,16 +254,16 @@ let ``basic parsing`` =
             testCase "pParams compared"
             <| Helpers.parseAndCompare (pParams .>> eof)
                 [
-                    "", ([], None)
-                    " :Trailing params", ([], Some "Trailing params")
-                    " test", ([ "test" ], None)
-                    " test another!:", ([ "test"; "another!:" ], None)
-                    " test anot:her!", ([ "test"; "anot:her!" ], None)
-                    " 1 2 3 4 5 6 7 8 9 10 11 12 :13 14", ([ "1"; "2"; "3"; "4"; "5"; "6"; "7"; "8"; "9"; "10"; "11"; "12"; ], Some "13 14")
-                    " 1 2 3 4 5 6 7::: 8:8 9 10 11 12 :13 : : : :: : ::::: 14", ([ "1"; "2"; "3"; "4"; "5"; "6"; "7:::"; "8:8"; "9"; "10"; "11"; "12"; ], Some "13 : : : :: : ::::: 14")
-                    " 1 2 3 4 5 6 7 8 9 10 11 12 13 14", ([ "1"; "2"; "3"; "4"; "5"; "6"; "7"; "8"; "9"; "10"; "11"; "12"; "13"; "14" ], None)
-                    " 1 2 3 4 5 6 7 8 9 10 11 12 13 14 this is really cool because it's implicit!", ([ "1"; "2"; "3"; "4"; "5"; "6"; "7"; "8"; "9"; "10"; "11"; "12"; "13"; "14" ], Some "this is really cool because it's implicit!")
-                    " 1 2 3 4 5 6 7 8 9 10 11 12 13 14 :this is really cool because it's explicit!", ([ "1"; "2"; "3"; "4"; "5"; "6"; "7"; "8"; "9"; "10"; "11"; "12"; "13"; "14" ], Some "this is really cool because it's explicit!")
+                    "", { Middle = []; Trailing = None }
+                    " :Trailing params", { Middle = []; Trailing = Some "Trailing params" }
+                    " test", { Middle = [ "test" ]; Trailing = None }
+                    " test another!:", { Middle = [ "test"; "another!:" ]; Trailing =  None }
+                    " test anot:her!", { Middle = [ "test"; "anot:her!" ]; Trailing = None }
+                    " 1 2 3 4 5 6 7 8 9 10 11 12 :13 14", { Middle = [ "1"; "2"; "3"; "4"; "5"; "6"; "7"; "8"; "9"; "10"; "11"; "12"; ]; Trailing = Some "13 14" }
+                    " 1 2 3 4 5 6 7::: 8:8 9 10 11 12 :13 : : : :: : ::::: 14", { Middle = [ "1"; "2"; "3"; "4"; "5"; "6"; "7:::"; "8:8"; "9"; "10"; "11"; "12"; ]; Trailing = Some "13 : : : :: : ::::: 14" }
+                    " 1 2 3 4 5 6 7 8 9 10 11 12 13 14", { Middle = [ "1"; "2"; "3"; "4"; "5"; "6"; "7"; "8"; "9"; "10"; "11"; "12"; "13"; "14" ]; Trailing = None }
+                    " 1 2 3 4 5 6 7 8 9 10 11 12 13 14 this is really cool because it's implicit!", { Middle = [ "1"; "2"; "3"; "4"; "5"; "6"; "7"; "8"; "9"; "10"; "11"; "12"; "13"; "14" ]; Trailing = Some "this is really cool because it's implicit!" }
+                    " 1 2 3 4 5 6 7 8 9 10 11 12 13 14 :this is really cool because it's explicit!", { Middle = [ "1"; "2"; "3"; "4"; "5"; "6"; "7"; "8"; "9"; "10"; "11"; "12"; "13"; "14" ]; Trailing = Some "this is really cool because it's explicit!" }
                 ]
             testCase "pParams failures"
             <| Helpers.parseAndExpectFailure (pParams .>> eof)
