@@ -344,3 +344,5 @@ let pMsgTo : Parser<_> =
             (attempt pAllUserParts) |>> ServerUser
             (attempt pNickName)     |>> (fun nick -> ServerUser { NickName = nick; Host = None; User = None })
         ]
+
+let pMsgTarget : Parser<_> = sepBy1 pMsgTo (pchar ',')

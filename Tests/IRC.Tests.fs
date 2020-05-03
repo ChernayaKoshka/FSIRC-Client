@@ -518,5 +518,21 @@ let ``basic parsing`` =
                     "syrk!kalt@192.168.0.1", MsgTo.ServerUser ({ NickName = "syrk"; User = Some "kalt"; Host = Some (HostAddress (IPAddress.Parse("192.168.0.1")) )})
                     "Angel!wings@192.168.0.1", MsgTo.ServerUser ({ NickName = "Angel"; User = Some "wings"; Host = Some (HostAddress (IPAddress.Parse("192.168.0.1")) )})
                 ]
+            testCase "pMsgTarget"
+            <| Helpers.parseAndCompare (pMsgTarget .>> eof)
+                [
+                    "WiZ!jto@tolsun.oulu.fi,syrk!kalt@millennium.stealth.net,Angel!wings@irc.org",
+                        [
+                            MsgTo.ServerUser ({ NickName = "WiZ"; User = Some "jto"; Host = Some (HostName "tolsun.oulu.fi") })
+                            MsgTo.ServerUser ({ NickName = "syrk"; User = Some "kalt"; Host = Some (HostName "millennium.stealth.net") })
+                            MsgTo.ServerUser ({ NickName = "Angel"; User = Some "wings"; Host = Some (HostName "irc.org") })
+                        ]
+                    "WiZ`^,syrk!kalt@millennium.stealth.net,!CID01Channel:Postfix",
+                        [
+                            MsgTo.ServerUser { NickName = "WiZ`^"; User = None; Host = None}
+                            MsgTo.ServerUser ({ NickName = "syrk"; User = Some "kalt"; Host = Some (HostName "millennium.stealth.net") })
+                            MsgTo.Channel { Prefix = "!CID01"; Name = "Channel"; Postfix = Some "Postfix" }
+                        ]
+                ]
         ]
     ]
