@@ -11,8 +11,8 @@
 | SPACE      |          ✔           |
 | crlf       |          ✔           |
 | target     |          ✔           |
-| msgtarget  |          ❌          |
-| msgto      |          ❌          |
+| msgtarget  |          ✔           |
+| msgto      |          ✔           |
 | channel    |          ✔           |
 | servername |          ✔           |
 | host       |          ✔           |
@@ -26,7 +26,7 @@
 | chanstring |          ✔           |
 | channelid  |          ✔           |
 | user       |          ✔           |
-| key        |          ❌          |
+| key        |          ✔           |
 | letter     |          ✔           |
 | digit      |          ✔           |
 | hexdigit   |          ✔           |
