@@ -346,3 +346,12 @@ let pMsgTo : Parser<_> =
         ]
 
 let pMsgTarget : Parser<_> = sepBy1 pMsgTo (pchar ',')
+
+// key        =  1*23( %x01-08 / %x0E-1F / %x21-7F )
+//                 ; any 7-bit US_ASCII character,
+//                 ; except NUL, CR, LF, FF, h/v TABs, and " "
+let pKey : Parser<_> =
+    manyMinMaxSatisfy 1 23 (fun c ->
+        List.contains c (
+            ['\x00'..'\xFF']
+            |> List.except [ '\x00'; '\r'; '\n'; '\f'; '\v'; '\t'; ' ' ]))
