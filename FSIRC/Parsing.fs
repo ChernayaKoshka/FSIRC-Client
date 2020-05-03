@@ -22,14 +22,6 @@ let incrementArgCount : Parser<_> =
 let resetArgCount : Parser<_> =
     setUserState { ArgsParsed = 0 }
 
-let many1CharsStartsWith (start: Parser<char>) (rest: Parser<char>) : Parser<_> =
-    start .>>. many1Chars rest
-    |>> (fun (a,b) -> string a + b)
-
-let manyCharsStartsWith (start: Parser<char>) (rest: Parser<char>) : Parser<_> =
-    start .>>. manyChars rest
-    |>> (fun (a,b) -> string a + b)
-
 let upperLetter = ['A'..'Z']
 let lowerLetter = ['a'..'z']
 
@@ -43,10 +35,18 @@ let special = ['['..'`'] @ ['{'..'}']
 
 let noEsc = [ '\x00'; '\\' ]
 
+// letter     =  %x41-5A / %x61-7A       ; A-Z / a-z
 let pLetter : Parser<_> = anyOf letter
+
+// digit      =  %x30-39                 ; 0-9
 let pDigit : Parser<_> = anyOf digit
 let pLetterOrDigit : Parser<_> = anyOf (digit @ letter)
+
+// hexdigit   =  digit / "A" / "B" / "C" / "D" / "E" / "F"
 let pHexDigit = anyOf hexDigit
+
+// special    =  %x5B-60 / %x7B-7D
+//                 ; "[", "]", "\", "`", "_", "^", "{", "|", "}"
 let pSpecial : Parser<_> = anyOf special
 
 // nospcrlfcl =  %x01-09 / %x0B-0C / %x0E-1F / %x21-39 / %x3B-FF
@@ -56,8 +56,8 @@ let pNoSpcCrLfCl : Parser<_> = noneOf [ '\x00'; '\r'; '\n'; ' '; ':'  ]
 // SPACE      =  %x20        ; space character
 let pSpace : Parser<_> = pchar ' '
 
-// crlf       =  %x0D %x0A   ; "carriage return" "linefeed"
 // https://bitbucket.org/fparsec/main/issues/18/cant-create-a-parser-to-parse-r-n-exactly
+// crlf       =  %x0D %x0A   ; "carriage return" "linefeed"
 let pCrLf : Parser<_> =
     let error = expected "newline (\\r\\n)"
     let crcn = TwoChars('\r', '\n')
@@ -68,6 +68,8 @@ let pCrLf : Parser<_> =
         else
             Reply(Error, error)
 
+// shortname  =  ( letter / digit ) *( letter / digit / "-" ) *( letter / digit )
+//                 ; as specified in RFC 1123 [HNAME]
 let pShortName : Parser<_> =
     (*
         abc
@@ -81,12 +83,15 @@ let pShortName : Parser<_> =
     .>>. stringsSepBy (many1Chars pLetterOrDigit) (pstring "-")
     |>> (fun (start, rest) -> string start + rest)
 
+// hostname   =  shortname *( "." shortname )
 let pHostName : Parser<_> =
     stringsSepBy1 pShortName (pstring ".")
 
+// servername =  hostname
 let pServerName = pHostName
 
 // could potentially allow for malformed IPV4 addresses, but this conforms to the IRC spec... hm...
+// ip4addr    =  1*3digit "." 1*3digit "." 1*3digit "." 1*3digit
 let pIP4Addr : Parser<_> =
     let part : Parser<string> = manyMinMaxSatisfy 1 3 Char.IsDigit
     pipe4
@@ -96,6 +101,8 @@ let pIP4Addr : Parser<_> =
         part
         (fun a b c d -> sprintf "%s.%s.%s.%s" a b c d |> IPAddress.Parse)
 
+// ip6addr    =  1*hexdigit 7( ":" 1*hexdigit )
+// ip6addr    =/ "0:0:0:0:0:" ( "0" / "FFFF" ) ":" ip4addr
 let pIP6Addr : Parser<_> =
     let pTypical : Parser<_> =
         let part : Parser<string> = many1Chars pHexDigit
@@ -118,22 +125,27 @@ let pIP6Addr : Parser<_> =
             // Maybe refactor IPV6/IPV4 to return string instead of address?
     pIPv4Format <|> pTypical
 
+// hostaddr   =  ip4addr / ip6addr
 let pHostAddr = (attempt pIP4Addr) <|> pIP6Addr
 
+// host       =  hostname / hostaddr
 let pHost = (attempt (pHostAddr |>> HostAddress)) <|> (pHostName |>> HostName)
 
+// nickname   =  ( letter / special ) *8( letter / digit / special / "-" )
 let pNickName : Parser<string> =
     (pLetter <|> pSpecial)
     .>>. manyMinMaxSatisfy 0 8 (fun c ->
         List.contains c (letter @ digit @ special @ [ '-' ]))
     |>> (fun (start, rest) -> string start + rest)
 
+// target     =  nickname / servername
 let pTarget =
-                                               // v prevents this parser from failing when it encounters a '.' which indicates that it is potentially a server name
+                                       // v prevents this parser from failing when it encounters a '.' which indicates that it is potentially a server name
     (pNickName .>>? notFollowedBy (pchar '.'))
     <|> pServerName
 
-// any octet except NUL, CR, LF, " " and "@"
+// user       =  1*( %x01-09 / %x0B-0C / %x0E-1F / %x21-3F / %x41-FF )
+//                 ; any octet except NUL, CR, LF, " " and "@"
 // in practice, it seems that [0-9] [a-z] [A-Z] [_] [-] or [.] are the only characters allowed
 // for simplicty's sake, I'm just going to exclude '%' and '!', because it makes it easier to parse messages
 let pUser : Parser<_> = many1Chars (noneOf [ '\x00'; '\r'; '\n'; ' '; '@'; '%'; '!' ])
@@ -167,7 +179,8 @@ let pAllUserParts : Parser<_> =
 
 // middle     =  nospcrlfcl *( ":" / nospcrlfcl )
 let pMiddle =
-    manyCharsStartsWith pNoSpcCrLfCl (pchar ':' <|> pNoSpcCrLfCl)
+    pNoSpcCrLfCl .>>. manyChars (pchar ':' <|> pNoSpcCrLfCl)
+    |>> (fun (a,b) -> string a + b)
 
 // trailing   =  *( ":" / " " / nospcrlfcl )
 let pTrailing = manyChars (anyOf [ ':'; ' ' ] <|> pNoSpcCrLfCl)
@@ -297,10 +310,6 @@ let pTargetMask : Parser<_> =
         pMask
         (fun target mask -> { Target = target; Mask = mask })
 
-// msgto      =  channel / ( user [ "%" host ] "@" servername )
-// msgto      =/ ( user "%" host ) / targetmask
-// msgto      =/ nickname / ( nickname "!" user "@" host )
-
 let pMsgToUserHostPart : Parser<_> =
     pchar '%' >>. pHost
 
@@ -335,6 +344,9 @@ let pMsgToUser : Parser<_> =
         }
     )
 
+// msgto      =  channel / ( user [ "%" host ] "@" servername )
+// msgto      =/ ( user "%" host ) / targetmask
+// msgto      =/ nickname / ( nickname "!" user "@" host )
 let pMsgTo : Parser<_> =
     choice
         [
