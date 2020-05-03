@@ -201,9 +201,9 @@ let ``basic parsing`` =
                     "A", TextCommand "A"
                     "BCDE", TextCommand "BCDE"
                     "FGHIJKLMNOPQRSTUVWXyzrfestghtjyafeadrwvkjzokx", TextCommand "FGHIJKLMNOPQRSTUVWXyzrfestghtjyafeadrwvkjzokx"
-                    "001", IntCommand 1u
-                    "500", IntCommand 500u
-                    "999", IntCommand 999u
+                    "001", IntCommand ServerReply.RPL_WELCOME
+                    "500", IntCommand (enum<ServerReply> 500)
+                    "999", IntCommand (enum<ServerReply> 999)
                 ]
             testCase "pMiddle compared"
             <| Helpers.parseAndCompare (pMiddle .>> eof)

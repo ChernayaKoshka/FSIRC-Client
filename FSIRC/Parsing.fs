@@ -222,7 +222,7 @@ let pPrefix : Parser<_> =
 // command    =  1*letter / 3digit
 let pCommand : Parser<_> =
     (many1Chars pLetter |>> TextCommand)
-    <|> (manyMinMaxSatisfy 3 3 Char.IsDigit |>> (uint32 >> IntCommand))
+    <|> (manyMinMaxSatisfy 3 3 Char.IsDigit |>> (int >> enum<ServerReply> >> IntCommand))
 
 // message    =  [ ":" prefix SPACE ] command [ params ] crlf
 let pMessage : Parser<_> =
