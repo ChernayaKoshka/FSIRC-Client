@@ -182,7 +182,7 @@ let ``basic parsing`` =
                     "a23456789", "a23456789"
                     "a", "a"
                     "bcde{}aaaaaaaaaaaa", "bcde{}aaaaaaaaaaaa"
-                    "~!#$^&*()_+{}|:\"<>?QWERetbezxstvxzc", "~!#$^&*()_+{}|:\"<>?QWERetbezxstvxzc"
+                    "~#$^&*()_+{}|:\"<>?QWERetbezxstvxzc", "~#$^&*()_+{}|:\"<>?QWERetbezxstvxzc"
                 ]
             testCase "pUser failures"
             <| Helpers.parseAndExpectFailure (pUser .>> eof)
@@ -479,27 +479,44 @@ let ``basic parsing`` =
                     "WiZ%abc-123.def.456@abc-123.def.456", { User = "WiZ"; Host = HostName "abc-123.def.456" |> Some; ServerName = Some "abc-123.def.456" }
                     "WiZ@irc.foonet.com", { User = "WiZ"; Host = None; ServerName = Some "irc.foonet.com" }
                 ]
-            //testCase "pMsgTo compared"
-            //<| Helpers.parseAndCompare (pMsgTo .>> eof)
-            //    [
-            //        "#", MsgTo.Channel { Prefix = "#"; Name = String.Empty; Postfix = None }
-            //        "#:", MsgTo.Channel { Prefix = "#"; Name = String.Empty; Postfix = Some String.Empty }
-            //        "#aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", MsgTo.Channel { Prefix = "#"; Name = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"; Postfix = None }
-            //        "#aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", MsgTo.Channel { Prefix = "#"; Name = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"; Postfix = Some "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" }
-            //        "+Channel", MsgTo.Channel { Prefix = "+"; Name = "Channel"; Postfix = None }
-            //        "+Channel:Postfix", MsgTo.Channel { Prefix = "+"; Name = "Channel"; Postfix = Some "Postfix" }
-            //        "&Channel", MsgTo.Channel { Prefix = "&"; Name = "Channel"; Postfix = None }
-            //        "&Channel:Postfix", MsgTo.Channel { Prefix = "&"; Name = "Channel"; Postfix = Some "Postfix" }
-            //        "!CID01Channel", MsgTo.Channel { Prefix = "!CID01"; Name = "Channel"; Postfix = None }
-            //        "!CID01Channel:Postfix", MsgTo.Channel { Prefix = "!CID01"; Name = "Channel"; Postfix = Some "Postfix" }
-//
-            //        "WiZ%192.168.0.1", MsgTo.User { User = "WiZ"; Host = HostAddress (IPAddress.Parse("192.168.0.1")) |> Some; ServerName = None }
-            //        "WiZ%192.168.0.1@irc.foonet.com", MsgTo.User { User = "WiZ"; Host = HostAddress (IPAddress.Parse("192.168.0.1")) |> Some; ServerName = Some "irc.foonet.com" }
-            //        "WiZ%abc-123.def.456", MsgTo.User { User = "WiZ"; Host = HostName "abc-123.def.456" |> Some; ServerName = None }
-            //        "WiZ%abc-123.def.456@abc-123.def.456", MsgTo.User { User = "WiZ"; Host = HostName "abc-123.def.456" |> Some; ServerName = Some "abc-123.def.456" }
-            //        "WiZ@irc.foonet.com", MsgTo.User { User = "WiZ"; Host = None; ServerName = Some "irc.foonet.com" }
-            //        "$", MsgTo.TargetMask '$'
-            //        "#", MsgTo.TargetMask '#'
-            //    ]
+            testCase "pMsgTo compared"
+            <| Helpers.parseAndCompare (pMsgTo .>> eof)
+                [
+                    "+Channel", MsgTo.Channel { Prefix = "+"; Name = "Channel"; Postfix = None }
+                    "+Channel:Postfix", MsgTo.Channel { Prefix = "+"; Name = "Channel"; Postfix = Some "Postfix" }
+                    "&Channel", MsgTo.Channel { Prefix = "&"; Name = "Channel"; Postfix = None }
+                    "&Channel:Postfix", MsgTo.Channel { Prefix = "&"; Name = "Channel"; Postfix = Some "Postfix" }
+                    "!CID01Channel", MsgTo.Channel { Prefix = "!CID01"; Name = "Channel"; Postfix = None }
+                    "!CID01Channel:Postfix", MsgTo.Channel { Prefix = "!CID01"; Name = "Channel"; Postfix = Some "Postfix" }
+
+                    "WiZ%192.168.0.1", MsgTo.User { User = "WiZ"; Host = HostAddress (IPAddress.Parse("192.168.0.1")) |> Some; ServerName = None }
+                    "WiZ%192.168.0.1@irc.foonet.com", MsgTo.User { User = "WiZ"; Host = HostAddress (IPAddress.Parse("192.168.0.1")) |> Some; ServerName = Some "irc.foonet.com" }
+                    "WiZ%abc-123.def.456", MsgTo.User { User = "WiZ"; Host = HostName "abc-123.def.456" |> Some; ServerName = None }
+                    "WiZ%abc-123.def.456@abc-123.def.456", MsgTo.User { User = "WiZ"; Host = HostName "abc-123.def.456" |> Some; ServerName = Some "abc-123.def.456" }
+                    "WiZ@irc.foonet.com", MsgTo.User { User = "WiZ"; Host = None; ServerName = Some "irc.foonet.com" }
+
+                    // No way to distinguish channel target vs wild, so we'll just _assume_ wild
+                    "#", MsgTo.TargetMask { Target = TargetType.Channel; Mask = [ ] }
+                    "#:", MsgTo.TargetMask { Target = TargetType.Channel; Mask = [ NonWild ':' ] }
+                    "#aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", MsgTo.TargetMask { Target = TargetType.Channel; Mask = List.replicate 49 (NonWild 'a')}
+                    "#aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", MsgTo.TargetMask { Target = TargetType.Channel; Mask = List.replicate 49 (NonWild 'a') @ [ NonWild ':' ] @ List.replicate 49 (NonWild 'b') }
+                    "$abc*.edu", MsgTo.TargetMask { Target = TargetType.Host; Mask = [ NonWild 'a'; NonWild 'b'; NonWild 'c'; WildMany; NonWild '.'; NonWild 'e'; NonWild 'd'; NonWild 'u' ] }
+                    "#abc?edu", MsgTo.TargetMask  { Target = TargetType.Channel; Mask = [ NonWild 'a'; NonWild 'b'; NonWild 'c'; WildOne; NonWild 'e'; NonWild 'd'; NonWild 'u' ] }
+
+                    "WiZ", MsgTo.ServerUser { NickName = "WiZ"; User = None; Host = None}
+                    "WiZ`^", MsgTo.ServerUser { NickName = "WiZ`^"; User = None; Host = None}
+                    "syrk", MsgTo.ServerUser { NickName = "syrk"; User = None; Host = None}
+                    "Angel", MsgTo.ServerUser { NickName = "Angel"; User = None; Host = None}
+
+                    "WiZ!jto@tolsun.oulu.fi", MsgTo.ServerUser ({ NickName = "WiZ"; User = Some "jto"; Host = Some (HostName "tolsun.oulu.fi") })
+                    "syrk!kalt@millennium.stealth.net", MsgTo.ServerUser ({ NickName = "syrk"; User = Some "kalt"; Host = Some (HostName "millennium.stealth.net") })
+                    "Angel!wings@irc.org", MsgTo.ServerUser ({ NickName = "Angel"; User = Some "wings"; Host = Some (HostName "irc.org") })
+                    "WiZ!jto@2600:1005:b062:61e4:74d7:f292:802c:fbfd", MsgTo.ServerUser ({ NickName = "WiZ"; User = Some "jto"; Host = Some (HostAddress (IPAddress.Parse("2600:1005:b062:61e4:74d7:f292:802c:fbfd")))})
+                    "syrk!kalt@2600:1005:b062:61e4:74d7:f292:802c:fbfd", MsgTo.ServerUser ({ NickName = "syrk"; User = Some "kalt"; Host = Some (HostAddress (IPAddress.Parse("2600:1005:b062:61e4:74d7:f292:802c:fbfd")))})
+                    "Angel!wings@2600:1005:b062:61e4:74d7:f292:802c:fbfd", MsgTo.ServerUser ({ NickName = "Angel"; User = Some "wings"; Host = Some (HostAddress (IPAddress.Parse("2600:1005:b062:61e4:74d7:f292:802c:fbfd")))})
+                    "WiZ!jto@192.168.0.1", MsgTo.ServerUser ({ NickName = "WiZ"; User = Some "jto"; Host = Some (HostAddress (IPAddress.Parse("192.168.0.1")) )})
+                    "syrk!kalt@192.168.0.1", MsgTo.ServerUser ({ NickName = "syrk"; User = Some "kalt"; Host = Some (HostAddress (IPAddress.Parse("192.168.0.1")) )})
+                    "Angel!wings@192.168.0.1", MsgTo.ServerUser ({ NickName = "Angel"; User = Some "wings"; Host = Some (HostAddress (IPAddress.Parse("192.168.0.1")) )})
+                ]
         ]
     ]

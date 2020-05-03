@@ -334,3 +334,13 @@ let pMsgToUser : Parser<_> =
             ServerName = server
         }
     )
+
+let pMsgTo : Parser<_> =
+    choice
+        [
+            (attempt pTargetMask)   |>> TargetMask
+            (attempt pChannel)      |>> Channel
+            (attempt pMsgToUser)    |>> User
+            (attempt pAllUserParts) |>> ServerUser
+            (attempt pNickName)     |>> (fun nick -> ServerUser { NickName = nick; Host = None; User = None })
+        ]
