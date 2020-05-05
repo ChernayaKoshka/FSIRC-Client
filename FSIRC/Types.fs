@@ -216,12 +216,22 @@ type Message =
     }
     with
         override this.ToString() =
-            let prefix = string this.Prefix
-            let command = string this.Command
+            let commandString =
+                [
+                    match this.Prefix with
+                    | Some prefix -> yield string prefix
+                    | None -> ()
 
-            let args = (String.concat " " this.Params.Middle) + (match this.Params.Trailing with Some trailing -> " :" + trailing | None -> String.Empty)
+                    yield string this.Command
 
-            sprintf "%s %s %s" prefix command args
+                    yield! this.Params.Middle
+
+                    match this.Params.Trailing with
+                    | Some trailing -> yield ":" + trailing
+                    | None -> ()
+                ]
+                |> String.concat " "
+            commandString + "\r\n"
 
 type Channel =
     {
