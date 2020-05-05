@@ -4,3 +4,4 @@ framework: >= net461
 nuget Expecto
 nuget FParsec
 nuget FSharp.Core
+nuget TaskBuilder.fs
