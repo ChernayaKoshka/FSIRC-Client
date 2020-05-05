@@ -71,9 +71,9 @@ type IRCConnection(details : ConnectionDetails) =
         member _.Dispose() = client.Dispose()
 
     with
-        member __.Login user nick = task {
+        member __.Login realName user nick = task {
             let nickCommand = { Prefix = None; Command = TextCommand "NICK"; Params = { Middle = [ nick ]; Trailing = None } }
-            let userCommand = { Prefix = None; Command = TextCommand "USER"; Params = { Middle = [ user; "0"; "*" ]; Trailing = Some "Fuckboi McGee" } }
+            let userCommand = { Prefix = None; Command = TextCommand "USER"; Params = { Middle = [ user; "0"; "*" ]; Trailing = Some realName } }
             do! sendMessage stream.Value nickCommand
             do! sendMessage stream.Value userCommand
         }
