@@ -5,7 +5,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Types.fs" />
-    <Compile Include="Extensions.fs" />
     <Compile Include="TCP.fs" />
     <Compile Include="Parsing.fs" />
     <Compile Include="FSIRC.fs" />
