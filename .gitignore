@@ -5,6 +5,7 @@
 
 # I added
 playground.fsx
+references.fsx
 
 # User-specific files
 *.rsuser
