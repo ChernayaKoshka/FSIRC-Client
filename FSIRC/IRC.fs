@@ -82,6 +82,9 @@ type IRCConnection(details : ConnectionDetails) =
         }
 
         member __.BeginProcessingReceived (token : CancellationToken) = task {
+            // https://stackoverflow.com/a/12893018/2396111
+            use _ = token.Register(fun _ -> match stream with Some stream -> stream.Close() | None -> ())
+
             do! connect client details
 
             stream <- client.GetStream() |> Some
