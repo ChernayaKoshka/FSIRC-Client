@@ -72,6 +72,9 @@ type IRCConnection(details : ConnectionDetails) =
 
     with
         member __.Login realName user nick = task {
+            // will add better logic in future
+            while stream = None do
+                do! Task.Delay(50)
             let nickCommand = { Prefix = None; Command = TextCommand "NICK"; Params = { Middle = [ nick ]; Trailing = None } }
             let userCommand = { Prefix = None; Command = TextCommand "USER"; Params = { Middle = [ user; "0"; "*" ]; Trailing = Some realName } }
             do! sendMessage stream.Value nickCommand
@@ -92,7 +95,7 @@ type IRCConnection(details : ConnectionDetails) =
                     do! processMessages stream.Value messages
                     buffer <- newBuffer
                 with
-                | :? TaskCanceledException -> ()
+                | :? OperationCanceledException -> ()
             Console.WriteLine("Goodbye!")
         }
 
