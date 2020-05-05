@@ -367,3 +367,8 @@ let pKey : Parser<_> =
         List.contains c (
             ['\x00'..'\xFF']
             |> List.except [ '\x00'; '\r'; '\n'; '\f'; '\v'; '\t'; ' ' ]))
+
+let parse parser str =
+    match runParserOnString parser { ArgsParsed = 0 }  "" str with
+    | Success(data, _, _) -> Result.Ok data
+    | Failure(err, _, _) -> Result.Error err
