@@ -1,20 +1,32 @@
 #r @"..\packages\FParsec\lib\netstandard2.0\FParsecCS.dll"
 #r @"..\packages\FParsec\lib\netstandard2.0\FParsec.dll"
-#r @"..\packages\TaskBuilder.fs\lib\net45\TaskBuilder.fs.dll"
+#r @"..\packages\TaskBuilder.fs\lib\netstandard1.6\TaskBuilder.fs.dll"
 #load "Types.fs"
 #load "TCP.fs"
 #load "Parsing.fs"
 #load "IRC.fs"
-#load "FSIRC.fs"
 
-open FSIRC.IRC
+open System.Net
+open System.Net.Sockets
+open FSIRC
 open FSIRC.TCP
 open System.Threading.Tasks
-
-let client = new IRCConnection({ host = "localhost"; port = 6667 })
+open FSharp.Control.Tasks.V2.ContextInsensitive
 
 let cts = new System.Threading.CancellationTokenSource()
-
-client.BeginProcessingReceived cts.Token
-
-client.Login "My Real Name!" "WiZaRd" "WiZ"
+let t = task {
+    let client = new TcpClient()
+    do! connect client "localhost" 6667
+    let stream = client.GetStream()
+    let holding = IRC.startMessageLoop stream cts.Token
+    let send = IRC.sendMessage stream
+    do! IRC.login stream "My Real Name!" "WiZaRd" "WiZ"
+    do! Task.Delay 5000
+    do! IRC.Messages.join "#" None |> send
+    do! Task.Delay 2000
+    do! IRC.Messages.privMsg "#" "This is a test message!" |> send
+    do! Task.Delay 2000
+    do! IRC.Messages.part "#" (Some "Bye bye!") |> send
+    do! Task.Delay 2000
+    cts.Cancel()
+}
