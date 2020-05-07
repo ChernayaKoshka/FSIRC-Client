@@ -29,7 +29,7 @@ module Messages =
         | Some key -> { Prefix = None; Command = TextCommand "JOIN"; Params = { Middle = [ channel; key ]; Trailing = None } }
         | None -> { Prefix = None; Command = TextCommand "JOIN"; Params = { Middle = [ channel ]; Trailing = None } }
 
-    let part channel partMessage = { Prefix = None; Command = TextCommand "JOIN"; Params = { Middle = [ channel ]; Trailing = partMessage } }
+    let part channel partMessage = { Prefix = None; Command = TextCommand "PART"; Params = { Middle = [ channel ]; Trailing = partMessage } }
 
 let sendMessage (stream: NetworkStream) (message: Message) = task {
     Console.WriteLine(sprintf "Sending: \"%s\"" (string message))
@@ -101,11 +101,13 @@ let startMessageLoop (stream: NetworkStream) (token: CancellationToken) = task {
     let mutable buffer : byte array = Array.zeroCreate 4096
     while not token.IsCancellationRequested do
         try
-            let! _ = stream.ReadAsync(buffer, buffer |> Array.findIndex ((=) 0uy), buffer.Length, token)
+            let bufIndex = buffer |> Array.findIndex ((=) 0uy)
+            let! _ = stream.ReadAsync(buffer, bufIndex, buffer.Length - bufIndex, token)
             let (messages, newBuffer) = getMessageChunksFromBytes buffer
             do! processMessages stream messages
             buffer <- newBuffer
         with
         | :? OperationCanceledException -> ()
+        | ex -> printfn "%A" ex
     Console.WriteLine("Goodbye!")
 }
