@@ -1,24 +1,17 @@
 module FSIRC.TCP
 
-open System
-open System.Text
 open System.Net.Sockets
-open System.IO
+open System.Net
+open System.Text
 open FSharp.Control.Tasks.V2.ContextInsensitive
-open System.Threading.Tasks
 
-type ConnectionDetails =
-    {
-        host : string
-        port : int
-    }
-
-let connect (tcpClient : TcpClient) connectionDetails = task {
-    return!
-        tcpClient.ConnectAsync(connectionDetails.host, connectionDetails.port)
+let connect (tcpClient : TcpClient) (host: string) port = task {
+    return! tcpClient.ConnectAsync(host, port)
 }
 
-let getStream (tcpClient : TcpClient) = tcpClient.GetStream()
+let directConnect (tcpClient : TcpClient) (host: IPAddress) port = task {
+    return! tcpClient.ConnectAsync(host, port)
+}
 
 let encodeStr (str : string) =
     Encoding.ASCII.GetBytes(str)
